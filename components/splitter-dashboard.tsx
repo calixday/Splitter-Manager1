@@ -13,6 +13,9 @@ export function SplitterDashboard() {
   const [searchType, setSearchType] = useState<"location" | "splitter">("location")
   const [showAddModal, setShowAddModal] = useState(false)
 
+  const totalLocations = locations.length
+  const totalSplitters = locations.reduce((sum, location) => sum + location.splitters.length, 0)
+
   const filteredLocations = locations.filter((location) => {
     if (searchType === "location") {
       return location.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -42,6 +45,17 @@ export function SplitterDashboard() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-8 grid grid-cols-2 gap-4">
+          <div className="rounded-lg border border-border bg-card p-6">
+            <p className="text-sm text-muted-foreground">Total Locations</p>
+            <p className="mt-2 text-3xl font-bold text-foreground">{totalLocations}</p>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-6">
+            <p className="text-sm text-muted-foreground">Total Splitters</p>
+            <p className="mt-2 text-3xl font-bold text-foreground">{totalSplitters}</p>
+          </div>
+        </div>
+
         <SearchBar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}

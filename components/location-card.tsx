@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AddSplitterModal } from "./add-splitter-modal"
 import { EditSplitterModal } from "./edit-splitter-modal"
+import { PasswordPromptModal } from "./password-prompt-modal"
 import type { Splitter } from "./location-context"
 
 interface LocationCardProps {
@@ -18,6 +19,45 @@ export function LocationCard({ location }: LocationCardProps) {
   const [showAddSplitter, setShowAddSplitter] = useState(false)
   const [editingSplitter, setEditingSplitter] = useState<Splitter | null>(null)
 
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false)
+  const [deleteAction, setDeleteAction] = useState<{
+    type: "location" | "splitter"
+    locationId: string
+    splitterId?: string
+    itemName: string
+  } | null>(null)
+
+  const handleDeleteLocation = () => {
+    setDeleteAction({
+      type: "location",
+      locationId: location.id,
+      itemName: location.name,
+    })
+    setShowPasswordPrompt(true)
+  }
+
+  const handleDeleteSplitter = (splitter: Splitter) => {
+    setDeleteAction({
+      type: "splitter",
+      locationId: location.id,
+      splitterId: splitter.id,
+      itemName: `${splitter.model} - Port ${splitter.port}`,
+    })
+    setShowPasswordPrompt(true)
+  }
+
+  const handlePasswordConfirm = () => {
+    if (!deleteAction) return
+
+    if (deleteAction.type === "location") {
+      deleteLocation(deleteAction.locationId)
+    } else if (deleteAction.type === "splitter" && deleteAction.splitterId) {
+      deleteSplitter(deleteAction.locationId, deleteAction.splitterId)
+    }
+
+    setDeleteAction(null)
+  }
+
   return (
     <>
       <Card className="overflow-hidden border-border bg-card">
@@ -27,7 +67,7 @@ export function LocationCard({ location }: LocationCardProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => deleteLocation(location.id)}
+              onClick={handleDeleteLocation}
               className="text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
               🗑 Delete
@@ -59,7 +99,7 @@ export function LocationCard({ location }: LocationCardProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => deleteSplitter(location.id, splitter.id)}
+                    onClick={() => handleDeleteSplitter(splitter)}
                     className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                   >
                     🗑 Delete
@@ -84,6 +124,13 @@ export function LocationCard({ location }: LocationCardProps) {
           splitter={editingSplitter}
         />
       )}
+
+      <PasswordPromptModal
+        open={showPasswordPrompt}
+        onOpenChange={setShowPasswordPrompt}
+        onConfirm={handlePasswordConfirm}
+        itemName={deleteAction?.itemName || ""}
+      />
     </>
   )
 }
