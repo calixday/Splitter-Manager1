@@ -29,6 +29,7 @@ interface LocationContextType {
 const LocationContext = createContext<LocationContextType | undefined>(undefined)
 
 const INITIAL_DATA: Location[] = [
+
   {
     id: "1",
     name: "Argwings kodhek-Elgeyo Marakwet",
@@ -156,8 +157,9 @@ const INITIAL_DATA: Location[] = [
     id: "15",
     name: "Lenana-Rose Avenue(Cab 1)",
     splitters: [
-      { id: "15-1", model: "Adhs C650", port: "9/3", notes: "Black tape" },
+      { id: "15-1", model: "Adhs C650", port: "8/7", notes: "Black tape" },
       { id: "15-2", model: "Adhs C620 2", port: "1/1", notes: "Thin patch cord" },
+      { id: "15-3", model: "Adhouse C650", port: "3/13" },
     ],
   },
   {
@@ -170,7 +172,33 @@ const INITIAL_DATA: Location[] = [
       { id: "16-4", model: "Adhs C650", port: "2/12" },
     ],
   },
-]
+  {
+    id: "17",
+    name: "Dennis pritt-Nyangumi",
+    splitters: [
+      { id: "17-1", model: "Adhouse C650", port: "9/6", notes: "Thin patch cord" },
+      { id: "17-2", model: "Adhouse C650", port: "3/12", notes: "Yellow Patch cord" },
+    ],
+  },
+  {
+    id: "18",
+    name: "Dhanjay",
+    splitters: [
+      { id: "18-1", model: "Adhouse C650", port: "1/1", notes: "Yellow Patch cord" },
+      { id: "18-2", model: "Adhouse C650", port: "4/11", notes: "Thin Patch cord" },
+    ],
+  },
+  {
+    id: "19",
+    name: "James Gichuru",
+    splitters: [
+      { id: "19-1", model: "Adhouse C650", port: "2/5", notes: "Yellow Patch cord" },
+      { id: "19-2", model: "Adhouse C620 1", port: "1/14", notes: "Thin Patch cord" },
+    ],
+  },
+];
+
+
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [locations, setLocations] = useState<Location[]>([])
