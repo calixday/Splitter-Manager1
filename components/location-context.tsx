@@ -1,13 +1,15 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useRef, useCallback } from "react"
+import { supabase } from "@/lib/supabase/client"
 
 export interface Splitter {
   id: string
   model: string
   port: string
   notes?: string
+  location_id?: string
 }
 
 export interface Location {
@@ -25,294 +27,210 @@ interface LocationContextType {
   updateSplitter: (locationId: string, splitterId: string, splitter: Splitter) => Promise<void>
   deleteSplitter: (locationId: string, splitterId: string) => Promise<void>
   isLoading: boolean
+  isConnected: boolean
 }
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined)
 
 const STORAGE_KEY = "splitters_app_data"
-const VERSION_KEY = "splitters_app_version"
-const DATA_VERSION_KEY = "splitters_app_data_version"
-const CURRENT_DATA_VERSION = 2 // Increment this to clear stale cache
-
-const INITIAL_DATA: Location[] = [
-  {
-    id: "1",
-    name: "Argwings kodhek-Elgeyo Marakwet",
-    splitters: [
-      { id: "1-1", model: "Adhouse C650", port: "9/5", notes: "" },
-      { id: "1-2", model: "Adhouse C650", port: "3/4", notes: "" },
-    ],
-  },
-  {
-    id: "2",
-    name: "Methodist",
-    splitters: [
-      { id: "2-1", model: "Adhouse C650", port: "3/9", notes: "" },
-      { id: "2-2", model: "Adhouse C650", port: "4/1", notes: "" },
-      { id: "2-3", model: "Adhouse C650", port: "2/7", notes: "" },
-      { id: "2-4", model: "Adhouse 620 2", port: "2/1", notes: "" },
-      { id: "2-5", model: "Adhouse 620", port: "1/4", notes: "" },
-    ],
-  },
-  {
-    id: "3",
-    name: "Kirichwa-Ngaira Region",
-    splitters: [
-      { id: "3-1", model: "Adhouse C650", port: "7/16", notes: "" },
-      { id: "3-2", model: "Adhouse C650", port: "8/1", notes: "" },
-    ],
-  },
-  {
-    id: "4",
-    name: "Lavington security(Cab 15)",
-    splitters: [
-      { id: "4-1", model: "Adhs C650", port: "1/8", notes: "Black tape" },
-      { id: "4-2", model: "Adhs C650", port: "3/7", notes: "" },
-      { id: "4-3", model: "Adhs C620 2", port: "1/9", notes: "" },
-    ],
-  },
-  {
-    id: "5",
-    name: "Lenana-Chaka",
-    splitters: [
-      { id: "5-1", model: "Adhs 650", port: "8/15", notes: "" },
-      { id: "5-2", model: "Adhs C650", port: "3/11", notes: "" },
-      { id: "5-3", model: "Adhs C620 2", port: "2/2", notes: "Thin patch cord" },
-    ],
-  },
-  {
-    id: "6",
-    name: "Chaka-Tigoni",
-    splitters: [
-      { id: "6-1", model: "Adhs 620 2", port: "1/2", notes: "dark blue patch cord" },
-      { id: "6-2", model: "Adhs 650", port: "3/10", notes: "White tape" },
-      { id: "6-3", model: "Adhs 620 1", port: "1/15", notes: "light blue patch cord" },
-    ],
-  },
-  {
-    id: "7",
-    name: "Dennis pritt - Woodlands",
-    splitters: [
-      { id: "7-1", model: "Adhs C650", port: "3/14", notes: "" },
-      { id: "7-2", model: "Adhs C650", port: "4/7", notes: "" },
-      { id: "7-3", model: "Adhs C620 2", port: "1/12", notes: "" },
-    ],
-  },
-  {
-    id: "8",
-    name: "Mbaazi-Kunde Road",
-    splitters: [
-      { id: "8-1", model: "Adhs C650", port: "7/8", notes: "" },
-      { id: "8-2", model: "Adhs C650", port: "4/6", notes: "" },
-    ],
-  },
-  {
-    id: "9",
-    name: "Lenana -Woodlands",
-    splitters: [
-      { id: "9-1", model: "Adhs C650", port: "7/14", notes: "" },
-      { id: "9-2", model: "Adhs C620 2", port: "2/9", notes: "" },
-    ],
-  },
-  {
-    id: "10",
-    name: "Kitanga Rd-Muthangari Rd",
-    splitters: [
-      { id: "10-1", model: "Adhs C650", port: "8/11", notes: "" },
-      { id: "10-2", model: "Adhs C650", port: "3/3", notes: "" },
-      { id: "10-3", model: "Adhs C650", port: "1/2", notes: "" },
-      { id: "10-4", model: "Adhs C620 2", port: "1/5", notes: "" },
-    ],
-  },
-  {
-    id: "11",
-    name: "Dennis Pritt-Citizen (Cab 17)",
-    splitters: [
-      { id: "11-1", model: "Adhs C620 1", port: "1/12", notes: "" },
-      { id: "11-2", model: "Adhs C650", port: "3/15", notes: "" },
-    ],
-  },
-  {
-    id: "12",
-    name: "Hendred Ave-White Knight Apt",
-    splitters: [
-      { id: "12-1", model: "Adhs C650", port: "4/4", notes: "" },
-      { id: "12-2", model: "Adhs C650", port: "9/12", notes: "" },
-    ],
-  },
-  {
-    id: "13",
-    name: "Hurlinghum-Shell(CAB 5)",
-    splitters: [
-      { id: "13-1", model: "JT C650", port: "2/9", notes: "Thin patch cords" },
-      { id: "13-2", model: "Adhs C650", port: "3/16", notes: "green paints" },
-      { id: "13-3", model: "Adhs C620 1", port: "2/16", notes: "black tape" },
-      { id: "13-4", model: "Adhs C620 1", port: "1/8", notes: "yellow patch cord" },
-    ],
-  },
-  {
-    id: "14",
-    name: "Msanduku",
-    splitters: [
-      { id: "14-1", model: "Adhs C650", port: "4/5", notes: "" },
-      { id: "14-2", model: "Adhs C650", port: "7/7", notes: "" },
-    ],
-  },
-  {
-    id: "15",
-    name: "Lenana-Rose Avenue(Cab 1)",
-    splitters: [
-      { id: "15-1", model: "Adhs C650", port: "8/7", notes: "Black tape" },
-      { id: "15-2", model: "Adhs C620 2", port: "1/1", notes: "Thin patch cord" },
-      { id: "15-3", model: "Adhouse C650", port: "3/13", notes: "" },
-    ],
-  },
-  {
-    id: "16",
-    name: "Kasuku center-kileleshwa",
-    splitters: [
-      { id: "16-1", model: "Adhs C650", port: "7/3", notes: "" },
-      { id: "16-2", model: "Adhs C650", port: "4/8", notes: "" },
-      { id: "16-3", model: "Adhs C650", port: "4/14", notes: "" },
-      { id: "16-4", model: "Adhs C650", port: "2/12", notes: "" },
-    ],
-  },
-  {
-    id: "17",
-    name: "Dennis spritt-Nyangumi",
-    splitters: [
-      { id: "17-1", model: "Adhouse C650", port: "9/6", notes: "Thin patch cord" },
-      { id: "17-2", model: "Adhouse C650", port: "3/12", notes: "Yellow Patch cord" },
-    ],
-  },
-  {
-    id: "18",
-    name: "Dhanjay",
-    splitters: [
-      { id: "18-1", model: "Adhouse C650", port: "1/1", notes: "Yellow Patch cord" },
-      { id: "18-2", model: "Adhouse C650", port: "4/11", notes: "Thin Patch cord" },
-    ],
-  },
-  {
-    id: "19",
-    name: "James Gichuru",
-    splitters: [
-      { id: "19-1", model: "Adhouse C650", port: "2/5", notes: "Yellow Patch cord" },
-      { id: "19-2", model: "Adhouse C620 1", port: "1/14", notes: "Thin Patch cord" },
-    ],
-  },
-]
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [locations, setLocations] = useState<Location[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [lastVersion, setLastVersion] = useState(0)
+  const [isConnected, setIsConnected] = useState(false)
+  const subscriptionsRef = useRef<any[]>([])
+
+  const fetchLocations = useCallback(async () => {
+    try {
+      const { data: locationsData, error: locationsError } = await supabase.from("locations").select("*").order("name")
+
+      if (locationsError) throw locationsError
+
+      if (locationsData && locationsData.length > 0) {
+        const { data: splittersData, error: splittersError } = await supabase.from("splitters").select("*")
+
+        if (splittersError) throw splittersError
+
+        // Transform data structure: combine locations with their splitters
+        const transformedLocations: Location[] = locationsData.map((loc: any) => ({
+          id: loc.id,
+          name: loc.name,
+          splitters: (splittersData || [])
+            .filter((s: any) => s.location_id === loc.id)
+            .map((s: any) => ({
+              id: s.id,
+              model: s.model,
+              port: s.port,
+              notes: s.notes || "",
+              location_id: s.location_id,
+            })),
+        }))
+
+        setLocations(transformedLocations)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(transformedLocations))
+        console.log("[v0] Loaded from Supabase:", transformedLocations.length, "locations")
+      }
+    } catch (error) {
+      console.error("[v0] Error fetching locations:", error)
+    }
+  }, [])
+
+  const setupRealtimeSubscription = useCallback(() => {
+    // Subscribe to locations table changes
+    const locationsChannel = supabase
+      .channel("locations_changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "locations" }, (payload) => {
+        console.log("[v0] Locations change detected:", payload.eventType)
+        fetchLocations()
+      })
+      .subscribe((status) => {
+        console.log("[v0] Locations subscription status:", status)
+        if (status === "SUBSCRIBED") setIsConnected(true)
+      })
+
+    // Subscribe to splitters table changes
+    const splittersChannel = supabase
+      .channel("splitters_changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "splitters" }, (payload) => {
+        console.log("[v0] Splitters change detected:", payload.eventType)
+        fetchLocations()
+      })
+      .subscribe((status) => {
+        console.log("[v0] Splitters subscription status:", status)
+      })
+
+    subscriptionsRef.current = [locationsChannel, splittersChannel]
+
+    return () => {
+      locationsChannel.unsubscribe()
+      splittersChannel.unsubscribe()
+    }
+  }, [fetchLocations])
 
   useEffect(() => {
-    const initialize = () => {
+    const initialize = async () => {
       try {
-        const storedDataVersion = localStorage.getItem(DATA_VERSION_KEY)
-        const needsReset = !storedDataVersion || Number.parseInt(storedDataVersion) < CURRENT_DATA_VERSION
-
-        if (needsReset) {
-          // Clear old data and use fresh INITIAL_DATA
-          localStorage.removeItem(STORAGE_KEY)
-          localStorage.removeItem(VERSION_KEY)
-          localStorage.setItem(DATA_VERSION_KEY, CURRENT_DATA_VERSION.toString())
-          console.log("[v0] Cache cleared - loading fresh data")
-        }
-
-        // Load stored data
-        const stored = localStorage.getItem(STORAGE_KEY)
-        if (stored) {
-          const data = JSON.parse(stored)
-          setLocations(data)
-          console.log("[v0] Loaded data from localStorage")
-        } else {
-          // Initialize with default data
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DATA))
-          setLocations(INITIAL_DATA)
-          console.log("[v0] Initialized with default data")
-        }
-
-        setIsLoading(false)
+        await fetchLocations()
+        setupRealtimeSubscription()
       } catch (error) {
-        console.error("[v0] Error initializing:", error)
-        setLocations(INITIAL_DATA)
+        console.error("[v0] Initialization error:", error)
+      } finally {
         setIsLoading(false)
       }
     }
 
     initialize()
 
-    const pollInterval = setInterval(() => {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY)
-        const version = localStorage.getItem(VERSION_KEY) || "0"
-        const currentVersion = Number.parseInt(version)
-
-        if (currentVersion > lastVersion && stored) {
-          const data = JSON.parse(stored)
-          setLocations(data)
-          setLastVersion(currentVersion)
-          console.log("[v0] Synced data from another device/tab")
-        }
-      } catch (error) {
-        console.error("[v0] Polling error:", error)
-      }
-    }, 3000)
-
-    return () => clearInterval(pollInterval)
-  }, [lastVersion])
-
-  const saveToStorage = (data: Location[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-    const newVersion = (lastVersion + 1).toString()
-    localStorage.setItem(VERSION_KEY, newVersion)
-    setLastVersion(Number.parseInt(newVersion))
-    setLocations(data)
-    console.log("[v0] Data saved and broadcasted to all devices")
-  }
+    // Cleanup subscriptions on unmount
+    return () => {
+      subscriptionsRef.current.forEach((channel) => channel?.unsubscribe())
+    }
+  }, [fetchLocations, setupRealtimeSubscription])
 
   const addLocation = async (location: Location) => {
-    const updated = [...locations, location]
-    saveToStorage(updated)
-  }
+    try {
+      const { error: locError } = await supabase.from("locations").insert({ id: location.id, name: location.name })
 
-  const deleteLocation = async (id: string) => {
-    const updated = locations.filter((loc) => loc.id !== id)
-    saveToStorage(updated)
-  }
+      if (locError) throw locError
 
-  const addSplitterToLocation = async (locationId: string, splitter: Splitter) => {
-    const updated = locations.map((loc) =>
-      loc.id === locationId ? { ...loc, splitters: [...loc.splitters, splitter] } : loc,
-    )
-    saveToStorage(updated)
-  }
+      // Add splitters to Supabase
+      if (location.splitters.length > 0) {
+        const { error: splitterError } = await supabase.from("splitters").insert(
+          location.splitters.map((s) => ({
+            id: s.id,
+            location_id: location.id,
+            model: s.model,
+            port: s.port,
+            notes: s.notes || "",
+          })),
+        )
 
-  const updateSplitter = async (locationId: string, splitterId: string, updatedSplitter: Splitter) => {
-    const updated = locations.map((loc) =>
-      loc.id === locationId
-        ? {
-            ...loc,
-            splitters: loc.splitters.map((s) => (s.id === splitterId ? updatedSplitter : s)),
-          }
-        : loc,
-    )
-    saveToStorage(updated)
-  }
+        if (splitterError) throw splitterError
+      }
 
-  const deleteSplitter = async (locationId: string, splitterId: string) => {
-    const updated = locations.map((loc) =>
-      loc.id === locationId ? { ...loc, splitters: loc.splitters.filter((s) => s.id !== splitterId) } : loc,
-    )
-    saveToStorage(updated)
+      console.log("[v0] Location added to Supabase")
+    } catch (error) {
+      console.error("[v0] Error adding location:", error)
+      throw error
+    }
   }
 
   const updateLocation = async (id: string, updatedLocation: Location) => {
-    const updated = locations.map((loc) => (loc.id === id ? updatedLocation : loc))
-    saveToStorage(updated)
+    try {
+      const { error } = await supabase.from("locations").update({ name: updatedLocation.name }).eq("id", id)
+
+      if (error) throw error
+
+      console.log("[v0] Location updated in Supabase")
+    } catch (error) {
+      console.error("[v0] Error updating location:", error)
+      throw error
+    }
+  }
+
+  const deleteLocation = async (id: string) => {
+    try {
+      const { error } = await supabase.from("locations").delete().eq("id", id)
+
+      if (error) throw error
+
+      console.log("[v0] Location deleted from Supabase")
+    } catch (error) {
+      console.error("[v0] Error deleting location:", error)
+      throw error
+    }
+  }
+
+  const addSplitterToLocation = async (locationId: string, splitter: Splitter) => {
+    try {
+      const { error } = await supabase.from("splitters").insert({
+        id: splitter.id,
+        location_id: locationId,
+        model: splitter.model,
+        port: splitter.port,
+        notes: splitter.notes || "",
+      })
+
+      if (error) throw error
+
+      console.log("[v0] Splitter added to Supabase")
+    } catch (error) {
+      console.error("[v0] Error adding splitter:", error)
+      throw error
+    }
+  }
+
+  const updateSplitter = async (locationId: string, splitterId: string, updatedSplitter: Splitter) => {
+    try {
+      const { error } = await supabase
+        .from("splitters")
+        .update({
+          model: updatedSplitter.model,
+          port: updatedSplitter.port,
+          notes: updatedSplitter.notes || "",
+        })
+        .eq("id", splitterId)
+
+      if (error) throw error
+
+      console.log("[v0] Splitter updated in Supabase")
+    } catch (error) {
+      console.error("[v0] Error updating splitter:", error)
+      throw error
+    }
+  }
+
+  const deleteSplitter = async (locationId: string, splitterId: string) => {
+    try {
+      const { error } = await supabase.from("splitters").delete().eq("id", splitterId)
+
+      if (error) throw error
+
+      console.log("[v0] Splitter deleted from Supabase")
+    } catch (error) {
+      console.error("[v0] Error deleting splitter:", error)
+      throw error
+    }
   }
 
   return (
@@ -326,6 +244,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         updateSplitter,
         deleteSplitter,
         isLoading,
+        isConnected,
       }}
     >
       {children}
