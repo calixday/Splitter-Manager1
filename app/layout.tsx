@@ -11,7 +11,7 @@ const _poppins = Poppins({
 export const metadata: Metadata = {
   title: "Splitter Manager",
   description: "Jamii Telecom Splitter Management System",
-  generator: "v0.app",
+  generator: "amos.app",
 }
 
 export default function RootLayout({

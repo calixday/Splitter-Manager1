@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useLocations, type Splitter } from "./location-context"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -21,6 +20,7 @@ export function EditSplitterModal({ open, onOpenChange, locationId, splitter }: 
   const [splitterModel, setSplitterModel] = useState("")
   const [splitterPort, setSplitterPort] = useState("")
   const [splitterNotes, setSplitterNotes] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -30,21 +30,29 @@ export function EditSplitterModal({ open, onOpenChange, locationId, splitter }: 
     }
   }, [open, splitter])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!splitterModel.trim() || !splitterPort.trim()) {
       alert("Please fill in all required fields")
       return
     }
 
-    updateSplitter(locationId, splitter.id, {
-      id: splitter.id,
-      model: splitterModel,
-      port: splitterPort,
-      notes: splitterNotes || undefined,
-    })
+    try {
+      setIsSubmitting(true)
+      await updateSplitter(locationId, splitter.id, {
+        id: splitter.id,
+        model: splitterModel,
+        port: splitterPort,
+        notes: splitterNotes || undefined,
+      })
 
-    onOpenChange(false)
+      onOpenChange(false)
+    } catch (error) {
+      console.error("Error updating splitter:", error)
+      alert("Failed to update splitter")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -92,11 +100,17 @@ export function EditSplitterModal({ open, onOpenChange, locationId, splitter }: 
             />
           </div>
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="flex-1"
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1">
-              Update Splitter
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? "Updating..." : "Update Splitter"}
             </Button>
           </div>
         </form>

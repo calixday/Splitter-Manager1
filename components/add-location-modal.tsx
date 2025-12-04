@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useLocations } from "./location-context"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -20,32 +19,41 @@ export function AddLocationModal({ open, onOpenChange }: AddLocationModalProps) 
   const [splitterModel, setSplitterModel] = useState("")
   const [splitterPort, setSplitterPort] = useState("")
   const [splitterNotes, setSplitterNotes] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!locationName.trim() || !splitterModel.trim() || !splitterPort.trim()) {
       alert("Please fill in all required fields")
       return
     }
 
-    addLocation({
-      id: Date.now().toString(),
-      name: locationName,
-      splitters: [
-        {
-          id: `${Date.now()}-1`,
-          model: splitterModel,
-          port: splitterPort,
-          notes: splitterNotes || undefined,
-        },
-      ],
-    })
+    try {
+      setIsSubmitting(true)
+      await addLocation({
+        id: Date.now().toString(),
+        name: locationName,
+        splitters: [
+          {
+            id: `${Date.now()}-1`,
+            model: splitterModel,
+            port: splitterPort,
+            notes: splitterNotes || undefined,
+          },
+        ],
+      })
 
-    setLocationName("")
-    setSplitterModel("")
-    setSplitterPort("")
-    setSplitterNotes("")
-    onOpenChange(false)
+      setLocationName("")
+      setSplitterModel("")
+      setSplitterPort("")
+      setSplitterNotes("")
+      onOpenChange(false)
+    } catch (error) {
+      console.error("Error adding location:", error)
+      alert("Failed to add location")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -107,11 +115,17 @@ export function AddLocationModal({ open, onOpenChange }: AddLocationModalProps) 
             />
           </div>
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="flex-1"
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1">
-              Add Location
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? "Adding..." : "Add Location"}
             </Button>
           </div>
         </form>

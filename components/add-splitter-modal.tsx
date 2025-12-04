@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useLocations } from "./location-context"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -20,25 +19,34 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
   const [splitterModel, setSplitterModel] = useState("")
   const [splitterPort, setSplitterPort] = useState("")
   const [splitterNotes, setSplitterNotes] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!splitterModel.trim() || !splitterPort.trim()) {
       alert("Please fill in all required fields")
       return
     }
 
-    addSplitterToLocation(locationId, {
-      id: Date.now().toString(),
-      model: splitterModel,
-      port: splitterPort,
-      notes: splitterNotes || undefined,
-    })
+    try {
+      setIsSubmitting(true)
+      await addSplitterToLocation(locationId, {
+        id: Date.now().toString(),
+        model: splitterModel,
+        port: splitterPort,
+        notes: splitterNotes || undefined,
+      })
 
-    setSplitterModel("")
-    setSplitterPort("")
-    setSplitterNotes("")
-    onOpenChange(false)
+      setSplitterModel("")
+      setSplitterPort("")
+      setSplitterNotes("")
+      onOpenChange(false)
+    } catch (error) {
+      console.error("Error adding splitter:", error)
+      alert("Failed to add splitter")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -86,11 +94,17 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
             />
           </div>
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="flex-1"
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1">
-              Add Splitter
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? "Adding..." : "Add Splitter"}
             </Button>
           </div>
         </form>

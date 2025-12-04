@@ -8,7 +8,7 @@ import { AddLocationModal } from "./add-location-modal"
 import { Button } from "@/components/ui/button"
 
 export function SplitterDashboard() {
-  const { locations } = useLocations()
+  const { locations, isLoading } = useLocations()
   const [searchQuery, setSearchQuery] = useState("")
   const [searchType, setSearchType] = useState<"location" | "splitter">("location")
   const [showAddModal, setShowAddModal] = useState(false)
@@ -36,10 +36,12 @@ export function SplitterDashboard() {
             <div>
               <h1 className="text-3xl font-bold text-foreground">Splitter Manager</h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                Jamii Telecommunication - Splitter & Location Tracking
+                Jamii Telecommunication - Splitter & Location Tracking {isLoading && "(Loading...)"}
               </p>
             </div>
-            <Button onClick={() => setShowAddModal(true)}>+ Add Location</Button>
+            <Button onClick={() => setShowAddModal(true)} disabled={isLoading}>
+              + Add Location
+            </Button>
           </div>
         </div>
       </header>
@@ -64,7 +66,11 @@ export function SplitterDashboard() {
         />
 
         <div className="mt-8">
-          {filteredLocations.length > 0 ? (
+          {isLoading ? (
+            <div className="rounded-lg border border-border bg-card p-8 text-center">
+              <p className="text-muted-foreground">Loading data from Supabase...</p>
+            </div>
+          ) : filteredLocations.length > 0 ? (
             <LocationList locations={filteredLocations} />
           ) : (
             <div className="rounded-lg border border-border bg-card p-8 text-center">

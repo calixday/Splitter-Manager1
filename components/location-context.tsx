@@ -18,43 +18,48 @@ export interface Location {
 
 interface LocationContextType {
   locations: Location[]
-  addLocation: (location: Location) => void
-  updateLocation: (id: string, location: Location) => void
-  deleteLocation: (id: string) => void
-  addSplitterToLocation: (locationId: string, splitter: Splitter) => void
-  updateSplitter: (locationId: string, splitterId: string, splitter: Splitter) => void
-  deleteSplitter: (locationId: string, splitterId: string) => void
+  addLocation: (location: Location) => Promise<void>
+  updateLocation: (id: string, location: Location) => Promise<void>
+  deleteLocation: (id: string) => Promise<void>
+  addSplitterToLocation: (locationId: string, splitter: Splitter) => Promise<void>
+  updateSplitter: (locationId: string, splitterId: string, splitter: Splitter) => Promise<void>
+  deleteSplitter: (locationId: string, splitterId: string) => Promise<void>
+  isLoading: boolean
 }
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined)
 
-const INITIAL_DATA: Location[] = [
+const STORAGE_KEY = "splitters_app_data"
+const VERSION_KEY = "splitters_app_version"
+const DATA_VERSION_KEY = "splitters_app_data_version"
+const CURRENT_DATA_VERSION = 2 // Increment this to clear stale cache
 
+const INITIAL_DATA: Location[] = [
   {
     id: "1",
     name: "Argwings kodhek-Elgeyo Marakwet",
     splitters: [
-      { id: "1-1", model: "Adhouse C650", port: "9/5" },
-      { id: "1-2", model: "Adhouse C650", port: "3/4" },
+      { id: "1-1", model: "Adhouse C650", port: "9/5", notes: "" },
+      { id: "1-2", model: "Adhouse C650", port: "3/4", notes: "" },
     ],
   },
   {
     id: "2",
     name: "Methodist",
     splitters: [
-      { id: "2-1", model: "Adhouse C650", port: "3/9" },
-      { id: "2-2", model: "Adhouse C650", port: "4/1" },
-      { id: "2-3", model: "Adhouse C650", port: "2/7" },
-      { id: "2-4", model: "Adhouse 620 2", port: "2/1" },
-      { id: "2-5", model: "Adhouse 620", port: "1/4" },
+      { id: "2-1", model: "Adhouse C650", port: "3/9", notes: "" },
+      { id: "2-2", model: "Adhouse C650", port: "4/1", notes: "" },
+      { id: "2-3", model: "Adhouse C650", port: "2/7", notes: "" },
+      { id: "2-4", model: "Adhouse 620 2", port: "2/1", notes: "" },
+      { id: "2-5", model: "Adhouse 620", port: "1/4", notes: "" },
     ],
   },
   {
     id: "3",
     name: "Kirichwa-Ngaira Region",
     splitters: [
-      { id: "3-1", model: "Adhouse C650", port: "7/16" },
-      { id: "3-2", model: "Adhouse C650", port: "8/1" },
+      { id: "3-1", model: "Adhouse C650", port: "7/16", notes: "" },
+      { id: "3-2", model: "Adhouse C650", port: "8/1", notes: "" },
     ],
   },
   {
@@ -62,16 +67,16 @@ const INITIAL_DATA: Location[] = [
     name: "Lavington security(Cab 15)",
     splitters: [
       { id: "4-1", model: "Adhs C650", port: "1/8", notes: "Black tape" },
-      { id: "4-2", model: "Adhs C650", port: "3/7" },
-      { id: "4-3", model: "Adhs C620 2", port: "1/9" },
+      { id: "4-2", model: "Adhs C650", port: "3/7", notes: "" },
+      { id: "4-3", model: "Adhs C620 2", port: "1/9", notes: "" },
     ],
   },
   {
     id: "5",
     name: "Lenana-Chaka",
     splitters: [
-      { id: "5-1", model: "Adhs 650", port: "8/15" },
-      { id: "5-2", model: "Adhs C650", port: "3/11" },
+      { id: "5-1", model: "Adhs 650", port: "8/15", notes: "" },
+      { id: "5-2", model: "Adhs C650", port: "3/11", notes: "" },
       { id: "5-3", model: "Adhs C620 2", port: "2/2", notes: "Thin patch cord" },
     ],
   },
@@ -88,51 +93,51 @@ const INITIAL_DATA: Location[] = [
     id: "7",
     name: "Dennis pritt - Woodlands",
     splitters: [
-      { id: "7-1", model: "Adhs C650", port: "3/14" },
-      { id: "7-2", model: "Adhs C650", port: "4/7" },
-      { id: "7-3", model: "Adhs C620 2", port: "1/12" },
+      { id: "7-1", model: "Adhs C650", port: "3/14", notes: "" },
+      { id: "7-2", model: "Adhs C650", port: "4/7", notes: "" },
+      { id: "7-3", model: "Adhs C620 2", port: "1/12", notes: "" },
     ],
   },
   {
     id: "8",
     name: "Mbaazi-Kunde Road",
     splitters: [
-      { id: "8-1", model: "Adhs C650", port: "7/8" },
-      { id: "8-2", model: "Adhs C650", port: "4/6" },
+      { id: "8-1", model: "Adhs C650", port: "7/8", notes: "" },
+      { id: "8-2", model: "Adhs C650", port: "4/6", notes: "" },
     ],
   },
   {
     id: "9",
     name: "Lenana -Woodlands",
     splitters: [
-      { id: "9-1", model: "Adhs C650", port: "7/14" },
-      { id: "9-2", model: "Adhs C620 2", port: "2/9" },
+      { id: "9-1", model: "Adhs C650", port: "7/14", notes: "" },
+      { id: "9-2", model: "Adhs C620 2", port: "2/9", notes: "" },
     ],
   },
   {
     id: "10",
     name: "Kitanga Rd-Muthangari Rd",
     splitters: [
-      { id: "10-1", model: "Adhs C650", port: "8/11" },
-      { id: "10-2", model: "Adhs C650", port: "3/3" },
-      { id: "10-3", model: "Adhs C650", port: "1/2" },
-      { id: "10-4", model: "Adhs C620 2", port: "1/5" },
+      { id: "10-1", model: "Adhs C650", port: "8/11", notes: "" },
+      { id: "10-2", model: "Adhs C650", port: "3/3", notes: "" },
+      { id: "10-3", model: "Adhs C650", port: "1/2", notes: "" },
+      { id: "10-4", model: "Adhs C620 2", port: "1/5", notes: "" },
     ],
   },
   {
     id: "11",
     name: "Dennis Pritt-Citizen (Cab 17)",
     splitters: [
-      { id: "11-1", model: "Adhs C620 1", port: "1/12" },
-      { id: "11-2", model: "Adhs C650", port: "3/15" },
+      { id: "11-1", model: "Adhs C620 1", port: "1/12", notes: "" },
+      { id: "11-2", model: "Adhs C650", port: "3/15", notes: "" },
     ],
   },
   {
     id: "12",
     name: "Hendred Ave-White Knight Apt",
     splitters: [
-      { id: "12-1", model: "Adhs C650", port: "4/4" },
-      { id: "12-2", model: "Adhs C650", port: "9/12" },
+      { id: "12-1", model: "Adhs C650", port: "4/4", notes: "" },
+      { id: "12-2", model: "Adhs C650", port: "9/12", notes: "" },
     ],
   },
   {
@@ -149,8 +154,8 @@ const INITIAL_DATA: Location[] = [
     id: "14",
     name: "Msanduku",
     splitters: [
-      { id: "14-1", model: "Adhs C650", port: "4/5" },
-      { id: "14-2", model: "Adhs C650", port: "7/7" },
+      { id: "14-1", model: "Adhs C650", port: "4/5", notes: "" },
+      { id: "14-2", model: "Adhs C650", port: "7/7", notes: "" },
     ],
   },
   {
@@ -159,22 +164,22 @@ const INITIAL_DATA: Location[] = [
     splitters: [
       { id: "15-1", model: "Adhs C650", port: "8/7", notes: "Black tape" },
       { id: "15-2", model: "Adhs C620 2", port: "1/1", notes: "Thin patch cord" },
-      { id: "15-3", model: "Adhouse C650", port: "3/13" },
+      { id: "15-3", model: "Adhouse C650", port: "3/13", notes: "" },
     ],
   },
   {
     id: "16",
     name: "Kasuku center-kileleshwa",
     splitters: [
-      { id: "16-1", model: "Adhs C650", port: "7/3" },
-      { id: "16-2", model: "Adhs C650", port: "4/8" },
-      { id: "16-3", model: "Adhs C650", port: "4/14" },
-      { id: "16-4", model: "Adhs C650", port: "2/12" },
+      { id: "16-1", model: "Adhs C650", port: "7/3", notes: "" },
+      { id: "16-2", model: "Adhs C650", port: "4/8", notes: "" },
+      { id: "16-3", model: "Adhs C650", port: "4/14", notes: "" },
+      { id: "16-4", model: "Adhs C650", port: "2/12", notes: "" },
     ],
   },
   {
     id: "17",
-    name: "Dennis pritt-Nyangumi",
+    name: "Dennis spritt-Nyangumi",
     splitters: [
       { id: "17-1", model: "Adhouse C650", port: "9/6", notes: "Thin patch cord" },
       { id: "17-2", model: "Adhouse C650", port: "3/12", notes: "Yellow Patch cord" },
@@ -196,52 +201,98 @@ const INITIAL_DATA: Location[] = [
       { id: "19-2", model: "Adhouse C620 1", port: "1/14", notes: "Thin Patch cord" },
     ],
   },
-];
-
-
+]
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [locations, setLocations] = useState<Location[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [lastVersion, setLastVersion] = useState(0)
 
   useEffect(() => {
-    const stored = localStorage.getItem("splitter-locations")
-    if (stored) {
-      setLocations(JSON.parse(stored))
-    } else {
-      setLocations(INITIAL_DATA)
-      localStorage.setItem("splitter-locations", JSON.stringify(INITIAL_DATA))
+    const initialize = () => {
+      try {
+        const storedDataVersion = localStorage.getItem(DATA_VERSION_KEY)
+        const needsReset = !storedDataVersion || Number.parseInt(storedDataVersion) < CURRENT_DATA_VERSION
+
+        if (needsReset) {
+          // Clear old data and use fresh INITIAL_DATA
+          localStorage.removeItem(STORAGE_KEY)
+          localStorage.removeItem(VERSION_KEY)
+          localStorage.setItem(DATA_VERSION_KEY, CURRENT_DATA_VERSION.toString())
+          console.log("[v0] Cache cleared - loading fresh data")
+        }
+
+        // Load stored data
+        const stored = localStorage.getItem(STORAGE_KEY)
+        if (stored) {
+          const data = JSON.parse(stored)
+          setLocations(data)
+          console.log("[v0] Loaded data from localStorage")
+        } else {
+          // Initialize with default data
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DATA))
+          setLocations(INITIAL_DATA)
+          console.log("[v0] Initialized with default data")
+        }
+
+        setIsLoading(false)
+      } catch (error) {
+        console.error("[v0] Error initializing:", error)
+        setLocations(INITIAL_DATA)
+        setIsLoading(false)
+      }
     }
-  }, [])
 
-  const saveLocations = (newLocations: Location[]) => {
-    setLocations(newLocations)
-    localStorage.setItem("splitter-locations", JSON.stringify(newLocations))
+    initialize()
+
+    const pollInterval = setInterval(() => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY)
+        const version = localStorage.getItem(VERSION_KEY) || "0"
+        const currentVersion = Number.parseInt(version)
+
+        if (currentVersion > lastVersion && stored) {
+          const data = JSON.parse(stored)
+          setLocations(data)
+          setLastVersion(currentVersion)
+          console.log("[v0] Synced data from another device/tab")
+        }
+      } catch (error) {
+        console.error("[v0] Polling error:", error)
+      }
+    }, 3000)
+
+    return () => clearInterval(pollInterval)
+  }, [lastVersion])
+
+  const saveToStorage = (data: Location[]) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    const newVersion = (lastVersion + 1).toString()
+    localStorage.setItem(VERSION_KEY, newVersion)
+    setLastVersion(Number.parseInt(newVersion))
+    setLocations(data)
+    console.log("[v0] Data saved and broadcasted to all devices")
   }
 
-  const addLocation = (location: Location) => {
-    const newLocations = [...locations, location]
-    saveLocations(newLocations)
+  const addLocation = async (location: Location) => {
+    const updated = [...locations, location]
+    saveToStorage(updated)
   }
 
-  const updateLocation = (id: string, updatedLocation: Location) => {
-    const newLocations = locations.map((loc) => (loc.id === id ? updatedLocation : loc))
-    saveLocations(newLocations)
+  const deleteLocation = async (id: string) => {
+    const updated = locations.filter((loc) => loc.id !== id)
+    saveToStorage(updated)
   }
 
-  const deleteLocation = (id: string) => {
-    const newLocations = locations.filter((loc) => loc.id !== id)
-    saveLocations(newLocations)
-  }
-
-  const addSplitterToLocation = (locationId: string, splitter: Splitter) => {
-    const newLocations = locations.map((loc) =>
+  const addSplitterToLocation = async (locationId: string, splitter: Splitter) => {
+    const updated = locations.map((loc) =>
       loc.id === locationId ? { ...loc, splitters: [...loc.splitters, splitter] } : loc,
     )
-    saveLocations(newLocations)
+    saveToStorage(updated)
   }
 
-  const updateSplitter = (locationId: string, splitterId: string, updatedSplitter: Splitter) => {
-    const newLocations = locations.map((loc) =>
+  const updateSplitter = async (locationId: string, splitterId: string, updatedSplitter: Splitter) => {
+    const updated = locations.map((loc) =>
       loc.id === locationId
         ? {
             ...loc,
@@ -249,14 +300,19 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           }
         : loc,
     )
-    saveLocations(newLocations)
+    saveToStorage(updated)
   }
 
-  const deleteSplitter = (locationId: string, splitterId: string) => {
-    const newLocations = locations.map((loc) =>
+  const deleteSplitter = async (locationId: string, splitterId: string) => {
+    const updated = locations.map((loc) =>
       loc.id === locationId ? { ...loc, splitters: loc.splitters.filter((s) => s.id !== splitterId) } : loc,
     )
-    saveLocations(newLocations)
+    saveToStorage(updated)
+  }
+
+  const updateLocation = async (id: string, updatedLocation: Location) => {
+    const updated = locations.map((loc) => (loc.id === id ? updatedLocation : loc))
+    saveToStorage(updated)
   }
 
   return (
@@ -269,6 +325,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         addSplitterToLocation,
         updateSplitter,
         deleteSplitter,
+        isLoading,
       }}
     >
       {children}
