@@ -31,11 +31,11 @@ export function AddLocationModal({ open, onOpenChange }: AddLocationModalProps) 
     try {
       setIsSubmitting(true)
       await addLocation({
-        id: Date.now().toString(),
+        id: "", // ID will be generated in context
         name: locationName,
         splitters: [
           {
-            id: `${Date.now()}-1`,
+            id: "", // ID will be generated in context
             model: splitterModel,
             port: splitterPort,
             notes: splitterNotes || undefined,
