@@ -9,7 +9,7 @@ const _poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: "Splitter Manager",
+  title: "Eng Ngaira",
   description: "Jamii Telecom Splitter Management System",
   generator: "ngaira.app",
 }
