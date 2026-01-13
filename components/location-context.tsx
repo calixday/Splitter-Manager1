@@ -3,7 +3,6 @@
 import type React from "react"
 import { createContext, useContext, useState, useEffect, useRef, useCallback } from "react"
 import { supabase } from "@/lib/supabase/client"
-import { v4 as uuidv4 } from "crypto-js"
 
 export interface Splitter {
   id: string
@@ -34,6 +33,10 @@ interface LocationContextType {
 const LocationContext = createContext<LocationContextType | undefined>(undefined)
 
 const STORAGE_KEY = "splitters_app_data"
+
+function generateUUID(): string {
+  return crypto.randomUUID()
+}
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [locations, setLocations] = useState<Location[]>([])
@@ -128,10 +131,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchLocations, setupRealtimeSubscription])
 
-  // Generate UUIDs for new locations and splitters
   const addLocation = async (location: Location) => {
     try {
-      const locationId = uuidv4() // Generate proper UUID
+      const locationId = generateUUID()
       const { error: locError } = await supabase.from("locations").insert({ id: locationId, name: location.name })
 
       if (locError) throw locError
@@ -140,7 +142,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       if (location.splitters.length > 0) {
         const { error: splitterError } = await supabase.from("splitters").insert(
           location.splitters.map((s) => ({
-            id: uuidv4(), // Generate proper UUID for each splitter
+            id: generateUUID(),
             location_id: locationId,
             model: s.model,
             port: s.port,
@@ -187,7 +189,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const addSplitterToLocation = async (locationId: string, splitter: Splitter) => {
     try {
       const { error } = await supabase.from("splitters").insert({
-        id: uuidv4(), // Generate proper UUID
+        id: generateUUID(),
         location_id: locationId,
         model: splitter.model,
         port: splitter.port,
