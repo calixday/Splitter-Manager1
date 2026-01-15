@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useLocations } from "./location-context"
 import { LocationList } from "./location-list"
 import { SearchBar } from "./search-bar"
@@ -12,6 +12,7 @@ export function SplitterDashboard() {
   const [searchType, setSearchType] = useState<"location" | "splitter">("splitter")
   const [showAddModal, setShowAddModal] = useState(false)
   const [showSearchModal, setShowSearchModal] = useState(false)
+  const searchModalRef = useRef<HTMLDivElement>(null)
 
   const totalLocations = locations.length
   const totalSplitters = locations.reduce((sum, location) => sum + location.splitters.length, 0)
@@ -27,6 +28,28 @@ export function SplitterDashboard() {
       )
     }
   })
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchModalRef.current && !searchModalRef.current.contains(e.target as Node)) {
+        setShowSearchModal(false)
+      }
+    }
+
+    const handleScroll = () => {
+      setShowSearchModal(false)
+    }
+
+    if (showSearchModal) {
+      document.addEventListener("mousedown", handleClickOutside)
+      window.addEventListener("scroll", handleScroll)
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [showSearchModal])
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -72,7 +95,10 @@ export function SplitterDashboard() {
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {showSearchModal && (
-          <div className="fixed left-4 top-24 w-64 rounded-xl bg-slate-800 border border-slate-700 shadow-lg p-4 z-50">
+          <div
+            ref={searchModalRef}
+            className="fixed right-4 top-1/2 transform -translate-y-1/2 w-72 rounded-xl bg-slate-800 border border-slate-700 shadow-2xl p-4 z-50"
+          >
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-slate-100">Search</h2>
               <button onClick={() => setShowSearchModal(false)} className="text-slate-400 hover:text-slate-200 text-xl">

@@ -66,7 +66,7 @@ export function LocationCard({ location }: LocationCardProps) {
             </div>
             <button
               onClick={handleDeleteLocation}
-              className="text-slate-400 hover:text-red-400 transition-colors flex-shrink-0 text-lg"
+              className="text-slate-400 hover:text-red-500 transition-colors flex-shrink-0 text-lg"
               title="Delete location"
             >
               🗑
@@ -74,12 +74,12 @@ export function LocationCard({ location }: LocationCardProps) {
           </div>
         </div>
 
-        <div className="p-3 space-y-2 flex-1 overflow-y-auto max-h-64">
+        <div className="p-3 space-y-3 flex-1 overflow-y-auto max-h-64">
           {location.splitters.length > 0 ? (
             location.splitters.map((splitter) => (
               <div
                 key={splitter.id}
-                className="rounded-lg border border-slate-700 bg-slate-700/50 p-2 hover:bg-slate-600/50 transition-colors"
+                className="rounded-lg border border-slate-700 bg-slate-700/50 p-3 hover:bg-slate-600/50 transition-colors"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
@@ -87,17 +87,17 @@ export function LocationCard({ location }: LocationCardProps) {
                     <p className="text-xs text-slate-400">Port: {splitter.port}</p>
                     {splitter.notes && <p className="text-xs text-slate-400 mt-1">{splitter.notes}</p>}
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={() => setEditingSplitter(splitter)}
-                      className="text-slate-400 hover:text-blue-400 transition-colors text-sm"
+                      className="text-slate-400 hover:text-yellow-400 transition-colors text-sm"
                       title="Edit splitter"
                     >
                       ✎
                     </button>
                     <button
                       onClick={() => handleDeleteSplitter(splitter)}
-                      className="text-slate-400 hover:text-red-400 transition-colors text-sm"
+                      className="text-slate-400 hover:text-red-500 transition-colors text-sm"
                       title="Delete splitter"
                     >
                       🗑
