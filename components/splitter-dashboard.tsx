@@ -31,30 +31,33 @@ export function SplitterDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
+        <div className="mx-auto max-w-7xl px-2 py-3 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Splitter Manager</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Jamii Telecommunication - Splitter & Location Tracking {isLoading && "(Loading...)"}
-              </p>
+              <h1 className="text-xl sm:text-3xl font-bold text-foreground">Splitter Manager</h1>
+              <p className="mt-1 text-xs sm:text-sm text-muted-foreground">SOUTH 1 {isLoading && "(Loading...)"}</p>
             </div>
-            <Button onClick={() => setShowAddModal(true)} disabled={isLoading}>
+            <Button
+              onClick={() => setShowAddModal(true)}
+              disabled={isLoading}
+              size="sm"
+              className="text-xs sm:text-base"
+            >
               + Add Location
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 grid grid-cols-2 gap-4">
-          <div className="rounded-lg border border-border bg-card p-6">
-            <p className="text-sm text-muted-foreground">Total Locations</p>
-            <p className="mt-2 text-3xl font-bold text-foreground">{totalLocations}</p>
+      <main className="mx-auto max-w-7xl px-2 py-4 sm:px-6 lg:px-8">
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:gap-4">
+          <div className="rounded-lg border border-border bg-card p-3 sm:p-6">
+            <p className="text-xs sm:text-sm text-muted-foreground">Total Locations</p>
+            <p className="mt-1 text-xl sm:text-3xl font-bold text-foreground">{totalLocations}</p>
           </div>
-          <div className="rounded-lg border border-border bg-card p-6">
-            <p className="text-sm text-muted-foreground">Total Splitters</p>
-            <p className="mt-2 text-3xl font-bold text-foreground">{totalSplitters}</p>
+          <div className="rounded-lg border border-border bg-card p-3 sm:p-6">
+            <p className="text-xs sm:text-sm text-muted-foreground">Total Splitters</p>
+            <p className="mt-1 text-xl sm:text-3xl font-bold text-foreground">{totalSplitters}</p>
           </div>
         </div>
 
@@ -65,16 +68,16 @@ export function SplitterDashboard() {
           setSearchType={setSearchType}
         />
 
-        <div className="mt-8">
+        <div className="mt-4">
           {isLoading ? (
-            <div className="rounded-lg border border-border bg-card p-8 text-center">
-              <p className="text-muted-foreground">Loading data from Supabase...</p>
+            <div className="rounded-lg border border-border bg-card p-4 sm:p-8 text-center">
+              <p className="text-sm sm:text-base text-muted-foreground">Loading data from Supabase...</p>
             </div>
           ) : filteredLocations.length > 0 ? (
             <LocationList locations={filteredLocations} />
           ) : (
-            <div className="rounded-lg border border-border bg-card p-8 text-center">
-              <p className="text-muted-foreground">
+            <div className="rounded-lg border border-border bg-card p-4 sm:p-8 text-center">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 No {searchType === "location" ? "locations" : "splitters"} found matching your search.
               </p>
             </div>

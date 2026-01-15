@@ -9,7 +9,7 @@ interface LocationListProps {
 
 export function LocationList({ locations }: LocationListProps) {
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
+    <div className="grid gap-3 sm:gap-6 md:grid-cols-1 lg:grid-cols-1">
       {locations.map((location) => (
         <LocationCard key={location.id} location={location} />
       ))}

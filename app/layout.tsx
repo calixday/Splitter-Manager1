@@ -9,9 +9,9 @@ const _poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: "Eng Ngaira",
+  title: "Splitter Manager",
   description: "Jamii Telecom Splitter Management System",
-  generator: "ngaira.app",
+  generator: "v0.app",
 }
 
 export default function RootLayout({
