@@ -12,6 +12,13 @@ interface LocationCardProps {
   location: Location
 }
 
+interface PasswordPromptModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onConfirm: () => void
+  itemName: string
+}
+
 export function LocationCard({ location }: LocationCardProps) {
   const { deleteLocation, deleteSplitter } = useLocations()
   const [showAddSplitter, setShowAddSplitter] = useState(false)
@@ -55,22 +62,46 @@ export function LocationCard({ location }: LocationCardProps) {
     setDeleteAction(null)
   }
 
+  const gradientColors = [
+    "from-blue-600 to-cyan-500",
+    "from-purple-600 to-pink-500",
+    "from-emerald-600 to-teal-500",
+    "from-orange-600 to-yellow-500",
+    "from-rose-600 to-red-500",
+    "from-indigo-600 to-blue-500",
+    "from-green-600 to-emerald-500",
+    "from-sky-600 to-cyan-500",
+  ]
+
+  // Use location name hash to pick a consistent color
+  const colorIndex = location.name.charCodeAt(0) % gradientColors.length
+  const gradientClass = gradientColors[colorIndex]
+
   return (
     <>
       <div className="rounded-xl bg-slate-800 border border-slate-700 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col h-full">
-        <div className="border-b border-slate-700 bg-gradient-to-r from-slate-800 to-slate-700 p-4">
+        <div className={`border-b border-slate-700 bg-gradient-to-r ${gradientClass} p-4`}>
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-slate-100 text-sm sm:text-base truncate">{location.name}</h3>
-              <p className="text-xs text-slate-400 mt-1">{location.splitters.length} splitter(s)</p>
+              <h3 className="font-bold text-white text-sm sm:text-base break-words">{location.name}</h3>
+              <p className="text-xs text-slate-100 mt-1">{location.splitters.length} splitter(s)</p>
             </div>
-            <button
-              onClick={handleDeleteLocation}
-              className="text-slate-400 hover:text-red-500 transition-colors flex-shrink-0 text-lg"
-              title="Delete location"
-            >
-              🗑
-            </button>
+            <div className="flex items-center gap-4 flex-shrink-0">
+              <button
+                onClick={() => setEditingSplitter(null)}
+                className="text-yellow-300 hover:text-yellow-100 transition-colors text-lg"
+                title="Edit location"
+              >
+                ✎
+              </button>
+              <button
+                onClick={handleDeleteLocation}
+                className="text-red-300 hover:text-red-100 transition-colors text-lg"
+                title="Delete location"
+              >
+                🗑
+              </button>
+            </div>
           </div>
         </div>
 
@@ -87,17 +118,17 @@ export function LocationCard({ location }: LocationCardProps) {
                     <p className="text-xs text-slate-400">Port: {splitter.port}</p>
                     {splitter.notes && <p className="text-xs text-slate-400 mt-1">{splitter.notes}</p>}
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-6 flex-shrink-0">
                     <button
                       onClick={() => setEditingSplitter(splitter)}
-                      className="text-slate-400 hover:text-yellow-400 transition-colors text-sm"
+                      className="text-yellow-400 hover:text-yellow-300 transition-colors text-lg font-semibold"
                       title="Edit splitter"
                     >
                       ✎
                     </button>
                     <button
                       onClick={() => handleDeleteSplitter(splitter)}
-                      className="text-slate-400 hover:text-red-500 transition-colors text-sm"
+                      className="text-red-500 hover:text-red-400 transition-colors text-lg font-semibold"
                       title="Delete splitter"
                     >
                       🗑

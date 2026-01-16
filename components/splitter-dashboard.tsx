@@ -33,11 +33,13 @@ export function SplitterDashboard() {
     const handleClickOutside = (e: MouseEvent) => {
       if (searchModalRef.current && !searchModalRef.current.contains(e.target as Node)) {
         setShowSearchModal(false)
+        setSearchQuery("")
       }
     }
 
     const handleScroll = () => {
       setShowSearchModal(false)
+      setSearchQuery("")
     }
 
     if (showSearchModal) {

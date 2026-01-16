@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 interface PasswordPromptModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onConfirm: (password: string) => void
+  onConfirm: () => void
   itemName: string
 }
 
@@ -19,7 +19,7 @@ export function PasswordPromptModal({ open, onOpenChange, onConfirm, itemName }:
     const correctPassword = "123456"
     if (password === correctPassword) {
       setError("")
-      onConfirm(password)
+      onConfirm()
       setPassword("")
       onOpenChange(false)
     } else {
