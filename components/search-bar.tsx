@@ -17,9 +17,8 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
     let value = e.target.value
 
     if (searchType === "splitter" && value.length > 0) {
-      const parts = value.split("/")
-      // Only auto-add slash if: has one part (no slash yet), is all digits, and last char is a digit
-      if (parts.length === 1 && /^\d+$/.test(value)) {
+      // Check if user just typed a single digit (not pasting)
+      if (value.length === 1 && /^\d$/.test(value)) {
         value = value + "/"
       }
     }

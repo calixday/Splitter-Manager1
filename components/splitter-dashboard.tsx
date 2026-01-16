@@ -103,7 +103,13 @@ export function SplitterDashboard() {
           >
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-slate-100">Search</h2>
-              <button onClick={() => setShowSearchModal(false)} className="text-slate-400 hover:text-slate-200 text-xl">
+              <button
+                onClick={() => {
+                  setShowSearchModal(false)
+                  setSearchQuery("")
+                }}
+                className="text-slate-400 hover:text-slate-200 text-xl"
+              >
                 ✕
               </button>
             </div>
