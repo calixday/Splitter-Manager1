@@ -5,9 +5,10 @@ import { useLocations } from "./location-context"
 import { LocationList } from "./location-list"
 import { SearchBar } from "./search-bar"
 import { AddLocationModal } from "./add-location-modal"
+import { TeamSelector } from "./team-selector"
 
 export function SplitterDashboard() {
-  const { locations, isLoading } = useLocations()
+  const { locations, isLoading, selectedTeamId, setSelectedTeamId } = useLocations()
   const [searchQuery, setSearchQuery] = useState("")
   const [searchType, setSearchType] = useState<"location" | "splitter">("splitter")
   const [showAddModal, setShowAddModal] = useState(false)
@@ -62,8 +63,9 @@ export function SplitterDashboard() {
               <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent">
                 SPLITTER MANAGER
               </h1>
-              <div className="flex items-center gap-4 mt-2">
+              <div className="flex items-center gap-4 mt-2 flex-wrap">
                 <p className="text-sm text-slate-400">Nairobi South 1</p>
+                <TeamSelector selectedTeamId={selectedTeamId} onTeamChange={setSelectedTeamId} />
                 <div className="flex items-center gap-3">
                   <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2 py-1 text-xs font-medium text-blue-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
@@ -85,7 +87,7 @@ export function SplitterDashboard() {
               </button>
               <button
                 onClick={() => setShowAddModal(true)}
-                disabled={isLoading}
+                disabled={isLoading || !selectedTeamId}
                 className="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
               >
                 + Add
@@ -124,7 +126,11 @@ export function SplitterDashboard() {
 
         {/* Locations Grid */}
         <div>
-          {isLoading ? (
+          {!selectedTeamId ? (
+            <div className="rounded-xl bg-slate-800 border border-slate-700 p-12 text-center shadow-sm">
+              <p className="text-slate-400">Please select a team from the header to view locations</p>
+            </div>
+          ) : isLoading ? (
             <div className="rounded-xl bg-slate-800 border border-slate-700 p-12 text-center shadow-sm">
               <p className="text-slate-400">Loading locations...</p>
             </div>
@@ -138,7 +144,7 @@ export function SplitterDashboard() {
         </div>
       </main>
 
-      <AddLocationModal open={showAddModal} onOpenChange={setShowAddModal} />
+      <AddLocationModal open={showAddModal} onOpenChange={setShowAddModal} teamId={selectedTeamId} />
     </div>
   )
 }

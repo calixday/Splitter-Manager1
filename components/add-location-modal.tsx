@@ -11,9 +11,10 @@ import { Label } from "@/components/ui/label"
 interface AddLocationModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  teamId: string
 }
 
-export function AddLocationModal({ open, onOpenChange }: AddLocationModalProps) {
+export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModalProps) {
   const { addLocation } = useLocations()
   const [locationName, setLocationName] = useState("")
   const [splitterModel, setSplitterModel] = useState("")
@@ -28,20 +29,29 @@ export function AddLocationModal({ open, onOpenChange }: AddLocationModalProps) 
       return
     }
 
+    if (!teamId) {
+      alert("Please select a team first")
+      return
+    }
+
     try {
       setIsSubmitting(true)
-      await addLocation({
-        id: "", // ID will be generated in context
-        name: locationName,
-        splitters: [
-          {
-            id: "", // ID will be generated in context
-            model: splitterModel,
-            port: splitterPort,
-            notes: splitterNotes || undefined,
-          },
-        ],
-      })
+      await addLocation(
+        {
+          id: "",
+          name: locationName,
+          team_id: teamId,
+          splitters: [
+            {
+              id: "",
+              model: splitterModel,
+              port: splitterPort,
+              notes: splitterNotes || undefined,
+            },
+          ],
+        },
+        teamId,
+      )
 
       setLocationName("")
       setSplitterModel("")

@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
+const PREDEFINED_MODELS = ["ADHS C620 1", "ADHS C620 2", "ADHS C650", "JT C650", "KAREN 650"]
+
 interface AddSplitterModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -20,6 +22,18 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
   const [splitterPort, setSplitterPort] = useState("")
   const [splitterNotes, setSplitterNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showModelInput, setShowModelInput] = useState(false)
+
+  const handlePortChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value
+
+    // Auto-add "/" after first digit
+    if (value.length === 1 && /^\d$/.test(value) && !value.includes("/")) {
+      value = value + "/"
+    }
+
+    setSplitterPort(value)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,6 +54,7 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
       setSplitterModel("")
       setSplitterPort("")
       setSplitterNotes("")
+      setShowModelInput(false)
       onOpenChange(false)
     } catch (error) {
       console.error("Error adding splitter:", error)
@@ -61,26 +76,70 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
             <Label htmlFor="model" className="text-foreground">
               Splitter Model *
             </Label>
-            <Input
-              id="model"
-              placeholder="e.g., Adhouse C650"
-              value={splitterModel}
-              onChange={(e) => setSplitterModel(e.target.value)}
-              className="border-border bg-background text-foreground"
-            />
+            {showModelInput ? (
+              <div className="flex gap-2">
+                <Input
+                  id="model"
+                  placeholder="Enter splitter model"
+                  value={splitterModel}
+                  onChange={(e) => setSplitterModel(e.target.value)}
+                  className="border-border bg-background text-foreground flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowModelInput(false)
+                    setSplitterModel("")
+                  }}
+                  className="px-3"
+                >
+                  ✕
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  {PREDEFINED_MODELS.map((model) => (
+                    <button
+                      key={model}
+                      type="button"
+                      onClick={() => setSplitterModel(model)}
+                      className={`p-2 rounded border text-sm transition-colors ${
+                        splitterModel === model
+                          ? "bg-blue-600 border-blue-600 text-white"
+                          : "border-border bg-background text-foreground hover:bg-slate-700"
+                      }`}
+                    >
+                      {model}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowModelInput(true)}
+                  className="w-full p-2 rounded border border-dashed border-slate-500 text-slate-400 hover:text-slate-300 text-sm transition-colors"
+                >
+                  + Enter Custom Model
+                </button>
+              </div>
+            )}
           </div>
+
           <div>
             <Label htmlFor="port" className="text-foreground">
-              Port Configuration *
+              Port Configuration * (e.g., 7/9)
             </Label>
             <Input
               id="port"
-              placeholder="e.g., 9/5"
+              placeholder="Type first digit, / will auto-add"
               value={splitterPort}
-              onChange={(e) => setSplitterPort(e.target.value)}
+              onChange={handlePortChange}
               className="border-border bg-background text-foreground"
+              maxLength={5}
             />
           </div>
+
           <div>
             <Label htmlFor="notes" className="text-foreground">
               Notes (Optional)
@@ -93,6 +152,7 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
               className="border-border bg-background text-foreground"
             />
           </div>
+
           <div className="flex gap-3 pt-4">
             <Button
               type="button"

@@ -14,16 +14,23 @@ interface SearchBarProps {
 
 export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchType }: SearchBarProps) {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value
+    let newValue = e.target.value
 
-    if (searchType === "splitter" && value.length > 0) {
-      // Check if user just typed a single digit (not pasting)
-      if (value.length === 1 && /^\d$/.test(value)) {
-        value = value + "/"
+    if (searchType === "splitter" && newValue.length > 0) {
+      // Check if we should auto-add "/"
+      if (newValue.length === 1 && /^\d$/.test(newValue)) {
+        // First digit - no need to add "/" yet
+        setSearchQuery(newValue)
+        return
+      }
+
+      if (newValue.length === 2 && /^\d\d$/.test(newValue) && !newValue.includes("/")) {
+        // Two digits without "/" - add it
+        newValue = newValue[0] + "/" + newValue[1]
       }
     }
 
-    setSearchQuery(value)
+    setSearchQuery(newValue)
   }
 
   return (
@@ -53,6 +60,15 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
           className="text-xs flex-1 py-1 h-auto"
         >
           Location
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => setSearchQuery("")}
+          size="sm"
+          className="text-xs px-2 h-auto"
+          title="Clear search (erase)"
+        >
+          🗑
         </Button>
       </div>
     </div>
