@@ -17,16 +17,12 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
     let newValue = e.target.value
 
     if (searchType === "splitter" && newValue.length > 0) {
-      // Check if we should auto-add "/"
+      // Auto-add "/" after first digit immediately
       if (newValue.length === 1 && /^\d$/.test(newValue)) {
-        // First digit - no need to add "/" yet
-        setSearchQuery(newValue)
-        return
-      }
-
-      if (newValue.length === 2 && /^\d\d$/.test(newValue) && !newValue.includes("/")) {
-        // Two digits without "/" - add it
-        newValue = newValue[0] + "/" + newValue[1]
+        newValue = newValue + "/"
+      } else if (newValue.length === 2 && /^\d\/$/.test(newValue)) {
+        // Already has "/" - allow typing the second digit
+        // This is fine as is
       }
     }
 
@@ -35,14 +31,23 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
 
   return (
     <div className="space-y-2">
-      <div className="relative">
+      <div className="relative flex items-center">
         <Input
           placeholder={searchType === "location" ? "Search location..." : "Search splitter (e.g., 7/9)..."}
           value={searchQuery}
           onChange={handleSearchChange}
-          className="w-full px-3 py-2 text-xs rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-xs rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
           autoFocus
         />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute right-3 text-slate-400 hover:text-red-400 transition-colors text-lg"
+            title="Clear search"
+          >
+            ✕
+          </button>
+        )}
       </div>
       <div className="flex gap-2">
         <Button
@@ -60,15 +65,6 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
           className="text-xs flex-1 py-1 h-auto"
         >
           Location
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => setSearchQuery("")}
-          size="sm"
-          className="text-xs px-2 h-auto"
-          title="Clear search (erase)"
-        >
-          🗑
         </Button>
       </div>
     </div>

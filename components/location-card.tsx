@@ -94,7 +94,7 @@ export function LocationCard({ location }: LocationCardProps) {
     <>
       <div className="rounded-xl bg-slate-800 border border-slate-700 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col h-full">
         <div
-          className={`border-b border-slate-700 bg-gradient-to-r ${gradientClass} p-4 flex items-start justify-between`}
+          className={`border-b border-slate-700 bg-gradient-to-r ${gradientClass} p-4 flex items-start justify-between gap-6`}
         >
           <div className="flex-1 min-w-0">
             {editingLocation ? (
@@ -137,21 +137,7 @@ export function LocationCard({ location }: LocationCardProps) {
                     <p className="text-xs text-slate-400">Port: {splitter.port}</p>
                     {splitter.notes && <p className="text-xs text-slate-400 mt-1">{splitter.notes}</p>}
                   </div>
-                  <div className="flex items-center gap-6 flex-shrink-0">
-                    <button
-                      onClick={() => setEditingSplitter(splitter)}
-                      className="text-yellow-400 hover:text-yellow-300 transition-colors text-lg font-semibold"
-                      title="Edit splitter"
-                    >
-                      ✎
-                    </button>
-                    <button
-                      onClick={() => handleDeleteSplitter(splitter)}
-                      className="text-red-500 hover:text-red-400 transition-colors text-lg font-semibold"
-                      title="Delete splitter"
-                    >
-                      🗑
-                    </button>
+                  <div className="flex items-center gap-0 flex-shrink-0">
                   </div>
                 </div>
               </div>
@@ -168,17 +154,8 @@ export function LocationCard({ location }: LocationCardProps) {
           </div>
         )}
 
-        <div className="p-3 border-t border-slate-700">
-          <button
-            onClick={() => setShowAddSplitter(true)}
-            className="w-full text-xs px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
-          >
-            + Add Splitter
-          </button>
-        </div>
-      </div>
 
-      <AddSplitterModal open={showAddSplitter} onOpenChange={setShowAddSplitter} locationId={location.id} />
+      </div>
 
       {editingSplitter && (
         <EditSplitterModal

@@ -101,7 +101,7 @@ export function SplitterDashboard() {
         {showSearchModal && (
           <div
             ref={searchModalRef}
-            className="fixed right-4 top-1/2 transform -translate-y-1/2 w-72 rounded-xl bg-slate-800 border border-slate-700 shadow-2xl p-4 z-50"
+            className="fixed right-4 top-1/2 transform -translate-y-1/2 w-96 rounded-xl bg-slate-800 border border-slate-700 shadow-2xl p-4 z-50"
           >
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-slate-100">Search</h2>

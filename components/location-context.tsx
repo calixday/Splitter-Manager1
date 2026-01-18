@@ -69,26 +69,23 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const fetchLocations = useCallback(
     async (teamId?: string) => {
       try {
-        const query = supabase.from("locations").select("*").order("name")
-
-        let locationsData: any[] = []
-        let splittersData: any[] = []
-
         const activeTeamId = teamId || selectedTeamId
-        if (activeTeamId) {
-          const { data, error } = await query.eq("team_id", activeTeamId)
-          if (error) throw error
-          locationsData = data || []
-        } else {
-          const { data, error } = await query
-          if (error) throw error
-          locationsData = data || []
+        
+        if (!activeTeamId) {
+          console.log("[v0] No team ID provided, skipping fetch")
+          setLocations([])
+          return
         }
+
+        const query = supabase.from("locations").select("*").eq("team_id", activeTeamId).order("name")
+
+        const { data: locationsData, error: locError } = await query
+        if (locError) throw locError
 
         if (locationsData && locationsData.length > 0) {
           const { data: splitters, error: splittersError } = await supabase.from("splitters").select("*")
           if (splittersError) throw splittersError
-          splittersData = splitters || []
+          const splittersData = splitters || []
 
           const transformedLocations: Location[] = locationsData.map((loc: any) => ({
             id: loc.id,
@@ -108,9 +105,13 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
           setLocations(transformedLocations)
           localStorage.setItem(STORAGE_KEY, JSON.stringify(transformedLocations))
+        } else {
+          setLocations([])
+          localStorage.setItem(STORAGE_KEY, JSON.stringify([]))
         }
       } catch (error) {
         console.error("[v0] Error fetching locations:", error)
+        setLocations([])
       }
     },
     [selectedTeamId],

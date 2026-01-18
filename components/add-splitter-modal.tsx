@@ -18,7 +18,7 @@ interface AddSplitterModalProps {
 
 export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitterModalProps) {
   const { addSplitterToLocation } = useLocations()
-  const [splitterModel, setSplitterModel] = useState("")
+  const [splitterModel, setSplitterModel] = useState(PREDEFINED_MODELS[0])
   const [splitterPort, setSplitterPort] = useState("")
   const [splitterNotes, setSplitterNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)

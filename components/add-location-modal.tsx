@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
+const PREDEFINED_MODELS = ["ADHS C620 1", "ADHS C620 2", "ADHS C650", "JT C650", "KAREN 650"]
+
 interface AddLocationModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -17,14 +19,26 @@ interface AddLocationModalProps {
 export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModalProps) {
   const { addLocation } = useLocations()
   const [locationName, setLocationName] = useState("")
-  const [splitterModel, setSplitterModel] = useState("")
+  const [splitterModel, setSplitterModel] = useState(PREDEFINED_MODELS[0])
   const [splitterPort, setSplitterPort] = useState("")
   const [splitterNotes, setSplitterNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showModelInput, setShowModelInput] = useState(false)
+  const [customModel, setCustomModel] = useState("")
+
+  const handlePortChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value
+    // Auto-add "/" after first digit
+    if (value.length === 1 && /^\d$/.test(value)) {
+      value = value + "/"
+    }
+    setSplitterPort(value)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!locationName.trim() || !splitterModel.trim() || !splitterPort.trim()) {
+    const finalModel = showModelInput ? customModel : splitterModel
+    if (!locationName.trim() || !finalModel.trim() || !splitterPort.trim()) {
       alert("Please fill in all required fields")
       return
     }
@@ -44,7 +58,7 @@ export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModa
           splitters: [
             {
               id: "",
-              model: splitterModel,
+              model: finalModel,
               port: splitterPort,
               notes: splitterNotes || undefined,
             },
@@ -54,9 +68,11 @@ export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModa
       )
 
       setLocationName("")
-      setSplitterModel("")
+      setSplitterModel(PREDEFINED_MODELS[0])
       setSplitterPort("")
       setSplitterNotes("")
+      setShowModelInput(false)
+      setCustomModel("")
       onOpenChange(false)
     } catch (error) {
       console.error("Error adding location:", error)
@@ -92,13 +108,48 @@ export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModa
             <Label htmlFor="splitter-model" className="text-foreground">
               Splitter Model *
             </Label>
-            <Input
-              id="splitter-model"
-              placeholder="e.g., Adhouse C650"
-              value={splitterModel}
-              onChange={(e) => setSplitterModel(e.target.value)}
-              className="border-border bg-background text-foreground"
-            />
+            {!showModelInput ? (
+              <div className="space-y-2">
+                <select
+                  value={splitterModel}
+                  onChange={(e) => setSplitterModel(e.target.value)}
+                  className="w-full border border-border bg-background text-foreground rounded px-3 py-2"
+                >
+                  {PREDEFINED_MODELS.map((model) => (
+                    <option key={model} value={model}>
+                      {model}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setShowModelInput(true)}
+                  className="text-xs text-blue-400 hover:text-blue-300"
+                >
+                  Or enter custom model
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Input
+                  id="splitter-model"
+                  placeholder="Enter custom model"
+                  value={customModel}
+                  onChange={(e) => setCustomModel(e.target.value)}
+                  className="border-border bg-background text-foreground"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModelInput(false)
+                    setCustomModel("")
+                  }}
+                  className="text-xs text-blue-400 hover:text-blue-300"
+                >
+                  Use predefined models
+                </button>
+              </div>
+            )}
           </div>
           <div>
             <Label htmlFor="splitter-port" className="text-foreground">
@@ -108,7 +159,7 @@ export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModa
               id="splitter-port"
               placeholder="e.g., 9/5"
               value={splitterPort}
-              onChange={(e) => setSplitterPort(e.target.value)}
+              onChange={handlePortChange}
               className="border-border bg-background text-foreground"
             />
           </div>
