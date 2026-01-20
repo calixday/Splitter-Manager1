@@ -13,7 +13,7 @@ const PREDEFINED_MODELS = ["ADHS C620 1", "ADHS C620 2", "ADHS C650", "JT C650",
 interface AddLocationModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  teamId: string
+  teamId: string // Declare teamId variable
 }
 
 export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModalProps) {
@@ -43,29 +43,20 @@ export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModa
       return
     }
 
-    if (!teamId) {
-      alert("Please select a team first")
-      return
-    }
-
     try {
       setIsSubmitting(true)
-      await addLocation(
-        {
-          id: "",
-          name: locationName,
-          team_id: teamId,
-          splitters: [
-            {
-              id: "",
-              model: finalModel,
-              port: splitterPort,
-              notes: splitterNotes || undefined,
-            },
-          ],
-        },
-        teamId,
-      )
+      await addLocation({
+        id: "",
+        name: locationName,
+        splitters: [
+          {
+            id: "",
+            model: finalModel,
+            port: splitterPort,
+            notes: splitterNotes || undefined,
+          },
+        ],
+      })
 
       setLocationName("")
       setSplitterModel(PREDEFINED_MODELS[0])

@@ -39,16 +39,19 @@ export function EditSplitterModal({ open, onOpenChange, locationId, splitter }: 
 
     try {
       setIsSubmitting(true)
+      console.log("[v0] Updating splitter with ID:", splitter.id, "locationId:", locationId)
       await updateSplitter(locationId, splitter.id, {
         id: splitter.id,
-        model: splitterModel,
-        port: splitterPort,
-        notes: splitterNotes || undefined,
+        model: splitterModel.trim(),
+        port: splitterPort.trim(),
+        notes: splitterNotes.trim() || undefined,
+        location_id: locationId,
       })
 
+      console.log("[v0] Splitter update successful")
       onOpenChange(false)
     } catch (error) {
-      console.error("Error updating splitter:", error)
+      console.error("[v0] Error updating splitter:", error)
       alert("Failed to update splitter")
     } finally {
       setIsSubmitting(false)

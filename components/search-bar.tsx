@@ -30,31 +30,32 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
   }
 
   return (
-    <div className="space-y-2">
-      <div className="relative flex items-center">
+    <div className="space-y-2 w-full">
+      <div className="relative flex items-center w-full">
         <Input
           placeholder={searchType === "location" ? "Search location..." : "Search splitter (e.g., 7/9)..."}
           value={searchQuery}
           onChange={handleSearchChange}
-          className="w-full px-3 py-2 text-xs rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+          className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 min-h-[2.5rem]"
           autoFocus
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery("")}
-            className="absolute right-3 text-slate-400 hover:text-red-400 transition-colors text-lg"
+            className="absolute right-3 text-slate-400 hover:text-red-400 transition-colors text-lg p-1"
             title="Clear search"
+            type="button"
           >
             ✕
           </button>
         )}
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 w-full">
         <Button
           variant={searchType === "splitter" ? "default" : "outline"}
           onClick={() => setSearchType("splitter")}
           size="sm"
-          className="text-xs flex-1 py-1 h-auto"
+          className="text-xs flex-1 py-2 h-auto"
         >
           Splitter
         </Button>
@@ -62,7 +63,7 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
           variant={searchType === "location" ? "default" : "outline"}
           onClick={() => setSearchType("location")}
           size="sm"
-          className="text-xs flex-1 py-1 h-auto"
+          className="text-xs flex-1 py-2 h-auto"
         >
           Location
         </Button>

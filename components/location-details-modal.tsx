@@ -30,10 +30,21 @@ export function LocationDetailsModal({ open, onOpenChange, location }: LocationD
 
   const handleUpdateName = async () => {
     if (locationName.trim() && locationName !== location.name) {
-      await updateLocation(location.id, {
-        ...location,
-        name: locationName.trim(),
-      })
+      try {
+        console.log("[v0] Updating location name to:", locationName.trim())
+        await updateLocation(location.id, {
+          id: location.id,
+          name: locationName.trim(),
+          splitters: location.splitters,
+        })
+        console.log("[v0] Location name update successful")
+        setEditingName(false)
+      } catch (error) {
+        console.error("[v0] Error updating location name:", error)
+        alert("Failed to update location name")
+        setLocationName(location.name)
+      }
+    } else {
       setEditingName(false)
     }
   }
@@ -75,9 +86,9 @@ export function LocationDetailsModal({ open, onOpenChange, location }: LocationD
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-screen h-screen max-w-none bg-slate-800 border border-slate-700 text-white rounded-none flex flex-col p-0">
-          <DialogHeader className="border-b border-slate-700 p-6">
-            <DialogTitle className="flex items-center justify-between text-2xl">
+        <DialogContent className="w-full sm:max-w-2xl max-h-[90vh] bg-slate-800 border border-slate-700 text-white rounded-lg flex flex-col p-0 gap-0" data-testid="location-details" style={showPasswordPrompt ? { pointerEvents: "none" } : {}}>
+          <DialogHeader className="border-b border-slate-700 p-4 sm:p-6">
+            <DialogTitle className="flex items-center justify-between text-lg sm:text-2xl">
               <div className="flex-1">
                 {editingName ? (
                   <input
@@ -105,30 +116,30 @@ export function LocationDetailsModal({ open, onOpenChange, location }: LocationD
             </DialogTitle>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="space-y-4 sm:space-y-6">
               <div>
-                <h3 className="font-semibold text-slate-200 mb-4 text-xl">Splitters ({location.splitters.length})</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <h3 className="font-semibold text-slate-200 mb-4 text-base sm:text-xl">Splitters ({location.splitters.length})</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {location.splitters.length > 0 ? (
                     location.splitters.map((splitter) => (
-                      <div key={splitter.id} className="bg-slate-700 rounded-lg p-4 flex flex-col justify-between">
+                      <div key={splitter.id} className="bg-slate-700 rounded-lg p-3 sm:p-4 flex flex-col justify-between">
                         <div>
-                          <p className="font-semibold text-slate-100 text-lg">{splitter.model}</p>
-                          <p className="text-sm text-slate-400 mt-1">Port: {splitter.port}</p>
-                          {splitter.notes && <p className="text-xs text-slate-400 mt-2">{splitter.notes}</p>}
+                          <p className="font-semibold text-slate-100 text-sm sm:text-lg break-words">{splitter.model}</p>
+                          <p className="text-xs sm:text-sm text-slate-400 mt-1">Port: {splitter.port}</p>
+                          {splitter.notes && <p className="text-xs text-slate-400 mt-2 line-clamp-2">{splitter.notes}</p>}
                         </div>
-                        <div className="flex items-center gap-4 mt-4">
+                        <div className="flex items-center gap-3 sm:gap-4 mt-3 sm:mt-4">
                           <button
                             onClick={() => handleEditSplitter(splitter)}
-                            className="text-yellow-400 hover:text-yellow-300 text-xl transition-colors"
+                            className="text-yellow-400 hover:text-yellow-300 text-lg sm:text-xl transition-colors"
                             title="Edit splitter"
                           >
                             ✎
                           </button>
                           <button
                             onClick={() => handleDeleteSplitter(splitter)}
-                            className="text-red-400 hover:text-red-300 text-xl transition-colors"
+                            className="text-red-400 hover:text-red-300 text-lg sm:text-xl transition-colors"
                             title="Delete splitter"
                           >
                             🗑
@@ -144,21 +155,21 @@ export function LocationDetailsModal({ open, onOpenChange, location }: LocationD
 
               {location.notes && (
                 <div>
-                  <h3 className="font-semibold text-slate-200 mb-2 text-xl">Notes</h3>
-                  <p className="text-slate-400 text-sm bg-slate-700 rounded p-4">{location.notes}</p>
+                  <h3 className="font-semibold text-slate-200 mb-2 text-base sm:text-xl">Notes</h3>
+                  <p className="text-slate-400 text-xs sm:text-sm bg-slate-700 rounded p-3 sm:p-4">{location.notes}</p>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex gap-2 p-6 border-t border-slate-700 bg-slate-900">
-            <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+          <div className="flex flex-col sm:flex-row gap-2 p-4 sm:p-6 border-t border-slate-700 bg-slate-900">
+            <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1 text-xs sm:text-sm">
               Close
             </Button>
-            <Button onClick={() => setShowAddSplitter(true)} className="flex-1 bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setShowAddSplitter(true)} className="flex-1 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700">
               + Add Splitter
             </Button>
-            <Button variant="destructive" onClick={handleDeleteLocation} className="flex-1 bg-red-600 hover:bg-red-700">
+            <Button variant="destructive" onClick={handleDeleteLocation} className="flex-1 text-xs sm:text-sm bg-red-600 hover:bg-red-700">
               Delete Location
             </Button>
           </div>

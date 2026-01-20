@@ -94,10 +94,33 @@
 /* Enhanced typography and spacing for modern design */
 * {
   @apply transition-colors;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Prevent text selection on interactive elements */
+button,
+[role="button"],
+a {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection in content areas */
+p,
+span,
+textarea,
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 body {
-  @apply bg-background text-foreground;
+  @apply bg-background text-foreground overflow-x-hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1,
@@ -112,6 +135,7 @@ h6 {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Custom scrollbar */

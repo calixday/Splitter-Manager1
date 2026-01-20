@@ -15,16 +15,12 @@ export interface Splitter {
 export interface Location {
   id: string
   name: string
-  team_id?: string
-  notes?: string
   splitters: Splitter[]
 }
 
 interface LocationContextType {
   locations: Location[]
-  selectedTeamId: string
-  setSelectedTeamId: (teamId: string) => void
-  addLocation: (location: Location, teamId: string) => Promise<void>
+  addLocation: (location: Location) => Promise<void>
   updateLocation: (id: string, location: Location) => Promise<void>
   deleteLocation: (id: string) => Promise<void>
   addSplitterToLocation: (locationId: string, splitter: Splitter) => Promise<void>
@@ -44,78 +40,49 @@ function generateUUID(): string {
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [locations, setLocations] = useState<Location[]>([])
-  const [selectedTeamId, setSelectedTeamId] = useState<string>("")
-  const [teamNgairaId, setTeamNgairaId] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
   const [isConnected, setIsConnected] = useState(false)
   const subscriptionsRef = useRef<any[]>([])
 
-  useEffect(() => {
-    const fetchDefaultTeam = async () => {
-      try {
-        const { data, error } = await supabase.from("teams").select("id").eq("name", "Team Ngaira").single()
-        if (error) throw error
-        if (data?.id) {
-          setTeamNgairaId(data.id)
-          setSelectedTeamId(data.id)
-        }
-      } catch (error) {
-        console.error("[v0] Error fetching default team:", error)
-      }
-    }
-    fetchDefaultTeam()
-  }, [])
+  const fetchLocations = useCallback(async () => {
+    try {
+      console.log("[v0] Fetching locations...")
+      const { data: locationsData, error: locError } = await supabase.from("locations").select("*").order("name")
+      if (locError) throw locError
 
-  const fetchLocations = useCallback(
-    async (teamId?: string) => {
-      try {
-        const activeTeamId = teamId || selectedTeamId
-        
-        if (!activeTeamId) {
-          console.log("[v0] No team ID provided, skipping fetch")
-          setLocations([])
-          return
-        }
+      console.log("[v0] Locations data received:", locationsData)
 
-        const query = supabase.from("locations").select("*").eq("team_id", activeTeamId).order("name")
+      if (locationsData && locationsData.length > 0) {
+        const { data: splitters, error: splittersError } = await supabase.from("splitters").select("*")
+        if (splittersError) throw splittersError
+        const splittersData = splitters || []
 
-        const { data: locationsData, error: locError } = await query
-        if (locError) throw locError
+        const transformedLocations: Location[] = locationsData.map((loc: any) => ({
+          id: loc.id,
+          name: loc.name,
+          notes: loc.notes,
+          splitters: splittersData
+            .filter((s: any) => s.location_id === loc.id)
+            .map((s: any) => ({
+              id: s.id,
+              model: s.model,
+              port: s.port,
+              notes: s.notes || "",
+              location_id: s.location_id,
+            })),
+        }))
 
-        if (locationsData && locationsData.length > 0) {
-          const { data: splitters, error: splittersError } = await supabase.from("splitters").select("*")
-          if (splittersError) throw splittersError
-          const splittersData = splitters || []
-
-          const transformedLocations: Location[] = locationsData.map((loc: any) => ({
-            id: loc.id,
-            name: loc.name,
-            team_id: loc.team_id,
-            notes: loc.notes,
-            splitters: splittersData
-              .filter((s: any) => s.location_id === loc.id)
-              .map((s: any) => ({
-                id: s.id,
-                model: s.model,
-                port: s.port,
-                notes: s.notes || "",
-                location_id: s.location_id,
-              })),
-          }))
-
-          setLocations(transformedLocations)
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(transformedLocations))
-        } else {
-          setLocations([])
-          localStorage.setItem(STORAGE_KEY, JSON.stringify([]))
-        }
-      } catch (error) {
-        console.error("[v0] Error fetching locations:", error)
+        setLocations(transformedLocations)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(transformedLocations))
+      } else {
         setLocations([])
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([]))
       }
-    },
-    [selectedTeamId],
-  )
+    } catch (error) {
+      console.error("[v0] Error fetching locations:", error)
+      setLocations([])
+    }
+  }, [])
 
   const setupRealtimeSubscription = useCallback(() => {
     // Subscribe to locations table changes
@@ -152,9 +119,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initialize = async () => {
       try {
-        if (selectedTeamId) {
-          await fetchLocations(selectedTeamId)
-        }
+        await fetchLocations()
         setupRealtimeSubscription()
       } catch (error) {
         console.error("[v0] Initialization error:", error)
@@ -169,22 +134,14 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscriptionsRef.current.forEach((channel) => channel?.unsubscribe())
     }
-  }, [fetchLocations, setupRealtimeSubscription, selectedTeamId])
+  }, [fetchLocations, setupRealtimeSubscription])
 
-  useEffect(() => {
-    if (selectedTeamId) {
-      fetchLocations(selectedTeamId)
-    }
-  }, [selectedTeamId, fetchLocations])
-
-  const addLocation = async (location: Location, teamId: string) => {
+  const addLocation = async (location: Location) => {
     try {
       const locationId = generateUUID()
       const { error: locError } = await supabase.from("locations").insert({
         id: locationId,
         name: location.name,
-        team_id: teamId,
-        notes: location.notes || "",
       })
 
       if (locError) throw locError
@@ -203,7 +160,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         if (splitterError) throw splitterError
       }
 
-      console.log("[v0] Location added to Supabase with team_id")
+      console.log("[v0] Location added to Supabase")
     } catch (error) {
       console.error("[v0] Error adding location:", error)
       throw error
@@ -214,7 +171,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     try {
       const { error } = await supabase
         .from("locations")
-        .update({ name: updatedLocation.name, notes: updatedLocation.notes || "" })
+        .update({ name: updatedLocation.name })
         .eq("id", id)
 
       if (error) throw error
@@ -295,8 +252,6 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     <LocationContext.Provider
       value={{
         locations,
-        selectedTeamId,
-        setSelectedTeamId,
         addLocation,
         updateLocation,
         deleteLocation,
