@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { toast } from "sonner"
 import type { Location, Splitter } from "./location-context"
 import { useLocations } from "./location-context"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { PasswordPromptModal } from "./password-prompt-modal"
 import { AddSplitterModal } from "./add-splitter-modal"
@@ -31,17 +32,15 @@ export function LocationDetailsModal({ open, onOpenChange, location }: LocationD
   const handleUpdateName = async () => {
     if (locationName.trim() && locationName !== location.name) {
       try {
-        console.log("[v0] Updating location name to:", locationName.trim())
         await updateLocation(location.id, {
           id: location.id,
           name: locationName.trim(),
           splitters: location.splitters,
         })
-        console.log("[v0] Location name update successful")
         setEditingName(false)
+        toast.success("Location updated successfully!")
       } catch (error) {
-        console.error("[v0] Error updating location name:", error)
-        alert("Failed to update location name")
+        toast.error("Failed to update location name")
         setLocationName(location.name)
       }
     } else {
@@ -86,7 +85,7 @@ export function LocationDetailsModal({ open, onOpenChange, location }: LocationD
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-full sm:max-w-2xl max-h-[90vh] bg-slate-800 border border-slate-700 text-white rounded-lg flex flex-col p-0 gap-0" data-testid="location-details" style={showPasswordPrompt ? { pointerEvents: "none" } : {}}>
+        <DialogContent className="w-full sm:max-w-2xl max-h-[90vh] bg-slate-800 border border-slate-700 text-white rounded-lg flex flex-col p-0 gap-0" data-testid="location-details" style={showPasswordPrompt ? { pointerEvents: "none" } : {}} showCloseButton={false}>
           <DialogHeader className="border-b border-slate-700 p-4 sm:p-6">
             <DialogTitle className="flex items-center justify-between text-lg sm:text-2xl">
               <div className="flex-1">
@@ -114,6 +113,7 @@ export function LocationDetailsModal({ open, onOpenChange, location }: LocationD
                 ✎
               </button>
             </DialogTitle>
+            <DialogDescription className="sr-only">View and manage location details, splitters, and notes</DialogDescription>
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto p-4 sm:p-6">

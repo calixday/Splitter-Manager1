@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { toast } from "sonner"
 import type { Location } from "./location-context"
 import { useLocations } from "./location-context"
 import { AddSplitterModal } from "./add-splitter-modal"
@@ -70,22 +71,33 @@ export function LocationCard({ location, highlightQuery = "", highlightType = "s
 
   const handleEditLocation = async () => {
     if (locationName.trim() && locationName !== location.name) {
-      await updateLocation(location.id, {
-        id: location.id,
-        name: locationName.trim(),
-        splitters: location.splitters,
-      })
-      setEditingLocation(false)
+      try {
+        await updateLocation(location.id, {
+          id: location.id,
+          name: locationName.trim(),
+          splitters: location.splitters,
+        })
+        setEditingLocation(false)
+        toast.success("Location updated successfully!")
+      } catch (error) {
+        toast.error("Failed to update location")
+      }
     }
   }
 
-  const handlePasswordConfirm = () => {
+  const handlePasswordConfirm = async () => {
     if (!deleteAction) return
 
-    if (deleteAction.type === "location") {
-      deleteLocation(deleteAction.locationId)
-    } else if (deleteAction.type === "splitter" && deleteAction.splitterId) {
-      deleteSplitter(deleteAction.locationId, deleteAction.splitterId)
+    try {
+      if (deleteAction.type === "location") {
+        await deleteLocation(deleteAction.locationId)
+        toast.success("Location deleted successfully!")
+      } else if (deleteAction.type === "splitter" && deleteAction.splitterId) {
+        await deleteSplitter(deleteAction.locationId, deleteAction.splitterId)
+        toast.success("Splitter deleted successfully!")
+      }
+    } catch (error) {
+      toast.error("Failed to delete item")
     }
 
     setDeleteAction(null)
@@ -139,7 +151,10 @@ export function LocationCard({ location, highlightQuery = "", highlightType = "s
             className="text-white hover:text-slate-200 transition-colors text-lg sm:text-xl flex-shrink-0 pt-1"
             title="Location settings"
           >
-            ⚙️
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
           </button>
         </div>
 

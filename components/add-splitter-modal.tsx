@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
+import { toast } from "sonner"
 import { useLocations } from "./location-context"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -56,9 +57,10 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
       setSplitterNotes("")
       setShowModelInput(false)
       onOpenChange(false)
+      toast.success("Splitter added successfully!")
     } catch (error) {
       console.error("Error adding splitter:", error)
-      alert("Failed to add splitter")
+      toast.error("Failed to add splitter")
     } finally {
       setIsSubmitting(false)
     }

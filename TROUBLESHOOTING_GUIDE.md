@@ -19,11 +19,11 @@ This guide provides a systematic approach to diagnose and resolve issues prevent
   - Location name exceeds database field limits (TEXT field has no limit in PostgreSQL, but consider UI/UX constraints)
 
 **Verification Method:**
-```
+\`\`\`
 Debug: Check add-location-modal.tsx handleSubmit()
 Location: Line 43-47 - Input validation
 Expected log: "Please fill in all required fields" alert should appear if name is empty
-```
+\`\`\`
 
 **Action if Issue Found:**
 - Inform user: "Location name is required and cannot be empty"
@@ -43,12 +43,12 @@ Expected log: "Please fill in all required fields" alert should appear if name i
   - Special characters in custom model name cause encoding issues
 
 **Verification Method:**
-```
+\`\`\`
 Debug: Check add-location-modal.tsx handleSubmit()
 Location: Line 43 - finalModel assignment
 const finalModel = showModelInput ? customModel : splitterModel
 Expected log: finalModel should never be empty
-```
+\`\`\`
 
 **Action if Issue Found:**
 - Validate: Is showModelInput true but customModel is empty?
@@ -68,11 +68,11 @@ Expected log: finalModel should never be empty
   - Leading/trailing whitespace
 
 **Verification Method:**
-```
+\`\`\`
 Debug: Check add-location-modal.tsx handleSubmit()
 Location: Line 43 - Port validation
 Expected log: Alert "Please fill in all required fields" if port is empty
-```
+\`\`\`
 
 **Action if Issue Found:**
 - Validate port format matches: `/^\d+\/\d+$/`
@@ -90,11 +90,11 @@ Expected log: Alert "Please fill in all required fields" if port is empty
   - Excessively long notes (>1000 characters recommended)
 
 **Verification Method:**
-```
+\`\`\`
 Debug: Check add-location-modal.tsx
 Notes field: splitterNotes state
 Expected: Can be empty string or any text
-```
+\`\`\`
 
 **Action if Issue Found:**
 - If notes exceed reasonable length: Truncate with warning
@@ -117,16 +117,16 @@ Expected: Can be empty string or any text
 - This is by design for the Team Ngaira splitters app
 
 **Verification Method:**
-```
+\`\`\`
 SQL Query to check for duplicates:
 SELECT COUNT(*) FROM public.locations WHERE name = 'LocationName'
-```
+\`\`\`
 
 **Action if Issue Found:**
 - If you want to enforce unique names: Add constraint
-  ```sql
+  \`\`\`sql
   ALTER TABLE public.locations ADD CONSTRAINT unique_location_name UNIQUE(name);
-  ```
+  \`\`\`
 - If duplicates are acceptable: Log warning but proceed
 
 ---
@@ -135,7 +135,7 @@ SELECT COUNT(*) FROM public.locations WHERE name = 'LocationName'
 **Check:** Tables exist with correct structure.
 
 **Required Schema:**
-```
+\`\`\`
 locations table:
 - id (UUID, Primary Key)
 - name (TEXT NOT NULL)
@@ -150,19 +150,19 @@ splitters table:
 - notes (TEXT, nullable)
 - created_at (TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)
 - updated_at (TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)
-```
+\`\`\`
 
 **Verification Method:**
-```
+\`\`\`
 Debug Tool: GetOrRequestIntegration ["Supabase"]
 This fetches live database schemas
-```
+\`\`\`
 
 **Action if Issue Found:**
 - If tables don't exist: Run migration
-  ```bash
+  \`\`\`bash
   Execute: /scripts/001_create_tables.sql
-  ```
+  \`\`\`
 - If schema mismatch: Check for missing columns or type mismatches
   - Compare actual schema against required schema above
   - Update migration if needed
@@ -177,12 +177,12 @@ This fetches live database schemas
 - Constraint: `FOREIGN KEY location_id REFERENCES locations(id) ON DELETE CASCADE`
 
 **Verification Method:**
-```
+\`\`\`
 When addLocation() executes in location-context.tsx:
 1. Location inserted with generated UUID
 2. Splitter inserted with reference to that UUID
 3. If location_id doesn't exist: Database rejects insert
-```
+\`\`\`
 
 **Action if Issue Found:**
 - Error message should contain: "violates foreign key constraint"
@@ -195,7 +195,7 @@ When addLocation() executes in location-context.tsx:
 **Check:** User permissions allow INSERT operations on both tables.
 
 **Current RLS Policies:**
-```sql
+\`\`\`sql
 -- Locations table
 CREATE POLICY "Allow all access to locations" ON public.locations
   FOR ALL USING (true) WITH CHECK (true);
@@ -203,14 +203,14 @@ CREATE POLICY "Allow all access to locations" ON public.locations
 -- Splitters table
 CREATE POLICY "Allow all access to splitters" ON public.splitters
   FOR ALL USING (true) WITH CHECK (true);
-```
+\`\`\`
 
 **Current Status:** All users can read/write (permissive policies)
 
 **Verification Method:**
-```
+\`\`\`
 Error message pattern: "new row violates row-level security policy"
-```
+\`\`\`
 
 **Action if Issue Found:**
 - If RLS policies deny access: Update policies to allow authenticated users
@@ -231,11 +231,11 @@ Error message pattern: "new row violates row-level security policy"
 **File Location:** `/lib/supabase/client.ts`
 
 **Verification Method:**
-```
+\`\`\`
 Check: app/Vars section in UI
 Look for NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
 If missing: Integration not connected
-```
+\`\`\`
 
 **Action if Issue Found:**
 - If variables missing: 
@@ -254,15 +254,15 @@ If missing: Integration not connected
 
 **File:** `/lib/supabase/client.ts`
 **Code:**
-```typescript
+\`\`\`typescript
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-```
+\`\`\`
 
 **Verification Method:**
-```
+\`\`\`
 Debug: Check browser console
 Look for: "Missing Supabase environment variables" error
-```
+\`\`\`
 
 **Action if Issue Found:**
 - If error appears: Environment variables not set (see Step 3.1)
@@ -274,12 +274,12 @@ Look for: "Missing Supabase environment variables" error
 **Check:** Application can reach Supabase servers.
 
 **Verification Method:**
-```
+\`\`\`
 Debug Log Evidence:
 [v0] Fetching locations... - Shows fetch attempt
 [v0] Locations data received: [...] - Shows successful connection
 [v0] Locations subscription status: SUBSCRIBED - Shows realtime working
-```
+\`\`\`
 
 **Common Network Issues:**
 - CORS (Cross-Origin Resource Sharing) blocked requests
@@ -299,21 +299,21 @@ Debug Log Evidence:
 **File:** Open browser DevTools → Console tab
 
 **Expected Success Logs:**
-```
+\`\`\`
 [v0] Fetching locations...
 [v0] Locations data received: [...]
 [v0] Locations subscription status: SUBSCRIBED
 [v0] Splitters subscription status: SUBSCRIBED
 [v0] Location added to Supabase
-```
+\`\`\`
 
 **Error Logs to Watch For:**
-```
+\`\`\`
 [v0] Error fetching locations: <error details>
 [v0] Error adding location: <error details>
 Error adding location: <error details>
 Failed to add location (from alert)
-```
+\`\`\`
 
 **Step-by-Step Log Analysis:**
 
@@ -338,43 +338,43 @@ Failed to add location (from alert)
 #### Step 4.2: Analyze Error Messages
 
 **Error Pattern 1: "violates foreign key constraint"**
-```
+\`\`\`
 Cause: Splitter inserted with non-existent location_id
 Solution: Ensure location UUID is valid and properly generated
 Check: addLocation() function generates UUID correctly
-```
+\`\`\`
 
 **Error Pattern 2: "violates row-level security policy"**
-```
+\`\`\`
 Cause: User lacks permission to insert
 Current Status: Not applicable (RLS policies allow all)
 Solution: Review RLS policies if they were modified
-```
+\`\`\`
 
 **Error Pattern 3: "column does not exist"**
-```
+\`\`\`
 Cause: Code references column not in schema
 Current Status: Verify against schema in Phase 2
 Solution: Check migration was run successfully
-```
+\`\`\`
 
 **Error Pattern 4: "relation does not exist"**
-```
+\`\`\`
 Cause: Table was never created
 Solution: Run /scripts/001_create_tables.sql
-```
+\`\`\`
 
 **Error Pattern 5: "Missing Supabase environment variables"**
-```
+\`\`\`
 Cause: ENV variables not configured
 Solution: See Phase 3, Step 3.1
-```
+\`\`\`
 
 **Error Pattern 6: Network errors / timeouts**
-```
+\`\`\`
 Cause: Cannot reach Supabase servers
 Solution: See Phase 3, Step 3.3
-```
+\`\`\`
 
 ---
 
@@ -382,7 +382,7 @@ Solution: See Phase 3, Step 3.3
 **File:** Browser Console logs from location-context.tsx
 
 **Expected Flow:**
-```
+\`\`\`
 1. App loads → setupRealtimeSubscription() called
 2. Console shows:
    [v0] Locations subscription status: SUBSCRIBED
@@ -390,7 +390,7 @@ Solution: See Phase 3, Step 3.3
 3. When location added:
    [v0] Locations change detected: INSERT
    fetchLocations() called automatically
-```
+\`\`\`
 
 **Action if Subscriptions Not Working:**
 - Realtime is enabled but subscriptions failed
@@ -407,9 +407,9 @@ Solution: See Phase 3, Step 3.3
 1. Open Supabase Dashboard
 2. Navigate to SQL Editor
 3. Run query:
-   ```sql
+   \`\`\`sql
    SELECT * FROM public.locations ORDER BY created_at DESC LIMIT 10;
-   ```
+   \`\`\`
 4. Check if your location appears
 5. If not visible: Data was not inserted despite "success" message
 
@@ -439,10 +439,10 @@ Solution: See Phase 3, Step 3.3
 #### Step 5.4: Create Seed Data for Testing
 **If database is empty and testing:**
 
-```bash
+\`\`\`bash
 Execute: /scripts/002_seed_data.sql
 This creates 21 test locations with 57 splitters
-```
+\`\`\`
 
 ---
 

@@ -2,7 +2,9 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect, useRef, useCallback } from "react"
-import { supabase } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/client"
+
+const supabase = createClient()
 
 export interface Splitter {
   id: string

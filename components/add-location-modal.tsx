@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
+import { toast } from "sonner"
 import { useLocations } from "./location-context"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -65,9 +66,10 @@ export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModa
       setShowModelInput(false)
       setCustomModel("")
       onOpenChange(false)
+      toast.success("Location added successfully!")
     } catch (error) {
       console.error("Error adding location:", error)
-      alert("Failed to add location")
+      toast.error("Failed to add location")
     } finally {
       setIsSubmitting(false)
     }

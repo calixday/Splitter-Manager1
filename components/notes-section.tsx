@@ -1,7 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { supabase } from "@/lib/supabase/client"
+import { toast } from "sonner"
+import { createClient } from "@/lib/supabase/client"
+
+const supabase = createClient()
 
 interface NotesSectionProps {
   locationId: string
@@ -20,8 +23,10 @@ export function NotesSection({ locationId, initialNotes = "" }: NotesSectionProp
 
       if (error) throw error
       setIsEditing(false)
+      toast.success("Notes saved successfully!")
     } catch (error) {
       console.error("[v0] Error saving notes:", error)
+      toast.error("Failed to save notes")
     } finally {
       setIsSaving(false)
     }

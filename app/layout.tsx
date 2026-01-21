@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Poppins } from "next/font/google"
+import { Toaster } from "sonner"
 import "./globals.css"
 
 const _poppins = Poppins({
@@ -36,7 +37,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className={`font-sans antialiased overflow-x-hidden`}>{children}</body>
+      <body className={`font-sans antialiased overflow-x-hidden`}>
+        {children}
+        <Toaster position="top-center" richColors />
+      </body>
     </html>
   )
 }
