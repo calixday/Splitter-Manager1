@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useState } from "react"
-import { toast } from "sonner"
 import { useLocations } from "./location-context"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -14,7 +13,7 @@ const PREDEFINED_MODELS = ["ADHS C620 1", "ADHS C620 2", "ADHS C650", "JT C650",
 interface AddLocationModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  teamId: string // Declare teamId variable
+  teamId: string
 }
 
 export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModalProps) {
@@ -44,20 +43,29 @@ export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModa
       return
     }
 
+    if (!teamId) {
+      alert("Please select a team first")
+      return
+    }
+
     try {
       setIsSubmitting(true)
-      await addLocation({
-        id: "",
-        name: locationName,
-        splitters: [
-          {
-            id: "",
-            model: finalModel,
-            port: splitterPort,
-            notes: splitterNotes || undefined,
-          },
-        ],
-      })
+      await addLocation(
+        {
+          id: "",
+          name: locationName,
+          team_id: teamId,
+          splitters: [
+            {
+              id: "",
+              model: finalModel,
+              port: splitterPort,
+              notes: splitterNotes || undefined,
+            },
+          ],
+        },
+        teamId,
+      )
 
       setLocationName("")
       setSplitterModel(PREDEFINED_MODELS[0])
@@ -66,10 +74,9 @@ export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModa
       setShowModelInput(false)
       setCustomModel("")
       onOpenChange(false)
-      toast.success("Location added successfully!")
     } catch (error) {
       console.error("Error adding location:", error)
-      toast.error("Failed to add location")
+      alert("Failed to add location")
     } finally {
       setIsSubmitting(false)
     }

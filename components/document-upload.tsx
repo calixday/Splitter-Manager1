@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { createClient } from "@/lib/supabase/client"
-const supabase = createClient()
+import { supabase } from "@/lib/supabase/client"
 
 interface DocumentUploadProps {
   locationId: string

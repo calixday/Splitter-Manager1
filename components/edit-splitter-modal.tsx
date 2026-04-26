@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { toast } from "sonner"
 import { useLocations, type Splitter } from "./location-context"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -40,21 +39,17 @@ export function EditSplitterModal({ open, onOpenChange, locationId, splitter }: 
 
     try {
       setIsSubmitting(true)
-      console.log("[v0] Updating splitter with ID:", splitter.id, "locationId:", locationId)
       await updateSplitter(locationId, splitter.id, {
         id: splitter.id,
-        model: splitterModel.trim(),
-        port: splitterPort.trim(),
-        notes: splitterNotes.trim() || undefined,
-        location_id: locationId,
+        model: splitterModel,
+        port: splitterPort,
+        notes: splitterNotes || undefined,
       })
 
-      console.log("[v0] Splitter update successful")
       onOpenChange(false)
-      toast.success("Splitter updated successfully!")
     } catch (error) {
-      console.error("[v0] Error updating splitter:", error)
-      toast.error("Failed to update splitter")
+      console.error("Error updating splitter:", error)
+      alert("Failed to update splitter")
     } finally {
       setIsSubmitting(false)
     }

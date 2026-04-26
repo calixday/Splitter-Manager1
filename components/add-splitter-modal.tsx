@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useState } from "react"
-import { toast } from "sonner"
 import { useLocations } from "./location-context"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -57,10 +56,9 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
       setSplitterNotes("")
       setShowModelInput(false)
       onOpenChange(false)
-      toast.success("Splitter added successfully!")
     } catch (error) {
       console.error("Error adding splitter:", error)
-      toast.error("Failed to add splitter")
+      alert("Failed to add splitter")
     } finally {
       setIsSubmitting(false)
     }
@@ -68,24 +66,24 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-border bg-card w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="border-border bg-card">
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl text-foreground">Add Splitter</DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm text-muted-foreground">Add a new splitter to this location</DialogDescription>
+          <DialogTitle className="text-foreground">Add Splitter</DialogTitle>
+          <DialogDescription className="text-muted-foreground">Add a new splitter to this location</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="model" className="text-foreground text-sm">
+            <Label htmlFor="model" className="text-foreground">
               Splitter Model *
             </Label>
             {showModelInput ? (
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2">
                 <Input
                   id="model"
                   placeholder="Enter splitter model"
                   value={splitterModel}
                   onChange={(e) => setSplitterModel(e.target.value)}
-                  className="border-border bg-background text-foreground flex-1 text-sm"
+                  className="border-border bg-background text-foreground flex-1"
                 />
                 <Button
                   type="button"
@@ -94,23 +92,23 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
                     setShowModelInput(false)
                     setSplitterModel("")
                   }}
-                  className="px-2 sm:px-3"
+                  className="px-3"
                 >
                   ✕
                 </Button>
               </div>
             ) : (
-              <div className="space-y-2 mt-2">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
                   {PREDEFINED_MODELS.map((model) => (
                     <button
                       key={model}
                       type="button"
                       onClick={() => setSplitterModel(model)}
-                      className={`p-2 rounded border text-xs sm:text-sm transition-colors touch-manipulation active:scale-95 ${
+                      className={`p-2 rounded border text-sm transition-colors ${
                         splitterModel === model
                           ? "bg-blue-600 border-blue-600 text-white"
-                          : "border-border bg-background text-foreground hover:bg-slate-700 active:bg-slate-600"
+                          : "border-border bg-background text-foreground hover:bg-slate-700"
                       }`}
                     >
                       {model}
@@ -120,7 +118,7 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
                 <button
                   type="button"
                   onClick={() => setShowModelInput(true)}
-                  className="w-full p-2 rounded border border-dashed border-slate-500 text-slate-400 hover:text-slate-300 text-xs sm:text-sm transition-colors touch-manipulation active:bg-slate-700/30"
+                  className="w-full p-2 rounded border border-dashed border-slate-500 text-slate-400 hover:text-slate-300 text-sm transition-colors"
                 >
                   + Enter Custom Model
                 </button>
@@ -129,7 +127,7 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
           </div>
 
           <div>
-            <Label htmlFor="port" className="text-foreground text-sm">
+            <Label htmlFor="port" className="text-foreground">
               Port Configuration * (e.g., 7/9)
             </Label>
             <Input
@@ -137,14 +135,13 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
               placeholder="Type first digit, / will auto-add"
               value={splitterPort}
               onChange={handlePortChange}
-              className="border-border bg-background text-foreground mt-2 text-sm"
+              className="border-border bg-background text-foreground"
               maxLength={5}
-              inputMode="numeric"
             />
           </div>
 
           <div>
-            <Label htmlFor="notes" className="text-foreground text-sm">
+            <Label htmlFor="notes" className="text-foreground">
               Notes (Optional)
             </Label>
             <Input
@@ -152,21 +149,21 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
               placeholder="e.g., Black tape, Thin patch cord"
               value={splitterNotes}
               onChange={(e) => setSplitterNotes(e.target.value)}
-              className="border-border bg-background text-foreground mt-2 text-sm"
+              className="border-border bg-background text-foreground"
             />
           </div>
 
-          <div className="flex gap-2 pt-4 flex-col-reverse sm:flex-row">
+          <div className="flex gap-3 pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="flex-1 text-sm"
+              className="flex-1"
               disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1 text-sm" disabled={isSubmitting}>
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
               {isSubmitting ? "Adding..." : "Add Splitter"}
             </Button>
           </div>
