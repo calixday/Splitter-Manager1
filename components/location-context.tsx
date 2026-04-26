@@ -12,6 +12,7 @@ export interface Splitter {
   port: string
   notes?: string
   location_id?: string
+  technician?: string
 }
 
 export interface Location {
@@ -71,6 +72,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
               port: s.port,
               notes: s.notes || "",
               location_id: s.location_id,
+              technician: s.technician || "",
             })),
         }))
 
@@ -206,6 +208,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         model: splitter.model,
         port: splitter.port,
         notes: splitter.notes || "",
+        technician: splitter.technician || "",
       })
 
       if (error) throw error
@@ -225,6 +228,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           model: updatedSplitter.model,
           port: updatedSplitter.port,
           notes: updatedSplitter.notes || "",
+          technician: updatedSplitter.technician || "",
         })
         .eq("id", splitterId)
 
