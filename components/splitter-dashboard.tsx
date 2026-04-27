@@ -36,8 +36,8 @@ export function SplitterDashboard() {
     <div className="min-h-screen bg-slate-950 flex flex-col">
       <header className="border-b border-slate-800 bg-slate-900 shadow-sm sticky top-0 z-40">
         <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-2.5 sm:py-3 gap-2 sm:gap-3">
-            <div className="flex-1 min-w-0">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between py-2.5 sm:py-3 gap-2 sm:gap-3">
+            <div className="flex-1 min-w-0 w-full lg:w-auto">
               <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent line-clamp-1">
                 SPLITTER MGR
               </h1>
@@ -55,6 +55,17 @@ export function SplitterDashboard() {
                 </span>
               </div>
             </div>
+            
+            {/* Search Bar on the Right */}
+            <div className="w-full lg:w-80 lg:ml-4">
+              <SearchBar
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                searchType={searchType}
+                setSearchType={setSearchType}
+              />
+            </div>
+            
             <button
               onClick={() => setShowAddModal(true)}
               disabled={isLoading}
@@ -68,16 +79,6 @@ export function SplitterDashboard() {
       </header>
 
       <main className="flex-1 mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8 py-3 sm:py-6">
-        {/* Search Bar - Compact and Always Visible */}
-        <div className="mb-4 p-2 sm:p-3 rounded-lg bg-slate-800 border border-slate-700 shadow-sm">
-          <SearchBar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            searchType={searchType}
-            setSearchType={setSearchType}
-          />
-        </div>
-
         {/* Search Results Header */}
         {searchQuery && (
           <div className="flex items-center justify-between mb-3 p-2 sm:p-3 bg-slate-800/50 rounded-lg border border-red-500/30">
