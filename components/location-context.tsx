@@ -66,12 +66,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       if (techError?.code === "PGRST116") {
         console.log("[v0] Technicians table doesn't exist yet. Using fallback data.")
         setTechnicians([
-          { id: "1", name: "John Smith" },
-          { id: "2", name: "Sarah Johnson" },
-          { id: "3", name: "Michael Brown" },
-          { id: "4", name: "Emma Davis" },
-          { id: "5", name: "David Wilson" },
-          { id: "6", name: "Lisa Anderson" },
+          { id: "1", name: "ngaira" },
+          { id: "2", name: "kioko" },
+          { id: "3", name: "tum" },
         ])
       } else if (techError) {
         console.error("[v0] Error fetching technicians:", techError)
