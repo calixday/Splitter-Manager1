@@ -18,11 +18,12 @@ interface AddLocationModalProps {
 }
 
 export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModalProps) {
-  const { addLocation } = useLocations()
+  const { addLocation, technicians } = useLocations()
   const [locationName, setLocationName] = useState("")
   const [splitterModel, setSplitterModel] = useState(PREDEFINED_MODELS[0])
   const [splitterPort, setSplitterPort] = useState("")
   const [splitterNotes, setSplitterNotes] = useState("")
+  const [selectedTechnicianId, setSelectedTechnicianId] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showModelInput, setShowModelInput] = useState(false)
   const [customModel, setCustomModel] = useState("")
@@ -49,6 +50,7 @@ export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModa
       await addLocation({
         id: "",
         name: locationName,
+        technician_id: selectedTechnicianId || undefined,
         splitters: [
           {
             id: "",
@@ -63,6 +65,7 @@ export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModa
       setSplitterModel(PREDEFINED_MODELS[0])
       setSplitterPort("")
       setSplitterNotes("")
+      setSelectedTechnicianId("")
       setShowModelInput(false)
       setCustomModel("")
       onOpenChange(false)
@@ -96,6 +99,24 @@ export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModa
               onChange={(e) => setLocationName(e.target.value)}
               className="border-border bg-background text-foreground"
             />
+          </div>
+          <div>
+            <Label htmlFor="technician" className="text-foreground">
+              Assigned Technician *
+            </Label>
+            <select
+              id="technician"
+              value={selectedTechnicianId}
+              onChange={(e) => setSelectedTechnicianId(e.target.value)}
+              className="w-full border border-border bg-background text-foreground rounded px-3 py-2"
+            >
+              <option value="">Select a technician</option>
+              {technicians.map((tech) => (
+                <option key={tech.id} value={tech.id}>
+                  {tech.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <Label htmlFor="splitter-model" className="text-foreground">

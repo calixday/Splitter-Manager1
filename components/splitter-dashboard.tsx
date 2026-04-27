@@ -9,7 +9,7 @@ import { AddLocationModal } from "./add-location-modal"
 export function SplitterDashboard() {
   const { locations, isLoading } = useLocations()
   const [searchQuery, setSearchQuery] = useState("")
-  const [searchType, setSearchType] = useState<"location" | "splitter">("splitter")
+  const [searchType, setSearchType] = useState<"location" | "splitter" | "technician">("splitter")
   const [showAddModal, setShowAddModal] = useState(false)
   const [showSearchModal, setShowSearchModal] = useState(false)
   const searchModalRef = useRef<HTMLDivElement>(null)
@@ -21,6 +21,8 @@ export function SplitterDashboard() {
   const filteredLocations = locations.filter((location) => {
     if (searchType === "location") {
       return location.name.toLowerCase().includes(searchQuery.toLowerCase())
+    } else if (searchType === "technician") {
+      return location.technician?.name.toLowerCase().includes(searchQuery.toLowerCase())
     } else {
       return location.splitters.some(
         (splitter) =>

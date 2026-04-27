@@ -13,7 +13,7 @@ import { LocationDetailsModal } from "./location-details-modal"
 interface LocationCardProps {
   location: Location
   highlightQuery?: string
-  highlightType?: "location" | "splitter"
+  highlightType?: "location" | "splitter" | "technician"
 }
 
 interface PasswordPromptModalProps {
@@ -40,6 +40,7 @@ export function LocationCard({ location, highlightQuery = "", highlightType = "s
 
   // Check if location or any of its splitters match the search query
   const isLocationMatching = highlightQuery && highlightType === "location" && location.name.toLowerCase().includes(highlightQuery.toLowerCase())
+  const isTechnicianMatching = highlightQuery && highlightType === "technician" && location.technician?.name.toLowerCase().includes(highlightQuery.toLowerCase())
   const matchingSplitters = highlightQuery && highlightType === "splitter" 
     ? location.splitters.filter(
         (splitter) =>
@@ -48,7 +49,7 @@ export function LocationCard({ location, highlightQuery = "", highlightType = "s
       )
     : []
   const hasMatchingSplitters = matchingSplitters.length > 0
-  const shouldHighlight = isLocationMatching || hasMatchingSplitters
+  const shouldHighlight = isLocationMatching || hasMatchingSplitters || isTechnicianMatching
 
   const handleDeleteLocation = () => {
     setDeleteAction({
@@ -145,6 +146,11 @@ export function LocationCard({ location, highlightQuery = "", highlightType = "s
               <h3 className="font-bold text-white text-xs sm:text-base break-words line-clamp-2">{location.name}</h3>
             )}
             <p className="text-xs text-slate-100 mt-1">{location.splitters.length} splitter(s)</p>
+            {location.technician && (
+              <p className={`text-xs mt-1 font-medium ${isTechnicianMatching ? "text-red-300 bg-red-500/20 px-2 py-0.5 rounded" : "text-yellow-200"}`}>
+                Tech: {location.technician.name}
+              </p>
+            )}
           </div>
           <button
             onClick={() => setShowLocationDetails(true)}

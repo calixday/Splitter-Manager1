@@ -17,9 +17,10 @@ interface LocationDetailsModalProps {
 }
 
 export function LocationDetailsModal({ open, onOpenChange, location }: LocationDetailsModalProps) {
-  const { deleteLocation, deleteSplitter, updateLocation } = useLocations()
+  const { deleteLocation, deleteSplitter, updateLocation, technicians } = useLocations()
   const [editingName, setEditingName] = useState(false)
   const [locationName, setLocationName] = useState(location.name)
+  const [selectedTechnicianId, setSelectedTechnicianId] = useState(location.technician_id || "")
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false)
   const [showAddSplitter, setShowAddSplitter] = useState(false)
   const [editingSplitter, setEditingSplitter] = useState<Splitter | null>(null)
@@ -35,6 +36,7 @@ export function LocationDetailsModal({ open, onOpenChange, location }: LocationD
         await updateLocation(location.id, {
           id: location.id,
           name: locationName.trim(),
+          technician_id: selectedTechnicianId || undefined,
           splitters: location.splitters,
         })
         setEditingName(false)
@@ -45,6 +47,22 @@ export function LocationDetailsModal({ open, onOpenChange, location }: LocationD
       }
     } else {
       setEditingName(false)
+    }
+  }
+
+  const handleUpdateTechnician = async (techId: string) => {
+    setSelectedTechnicianId(techId)
+    try {
+      await updateLocation(location.id, {
+        id: location.id,
+        name: location.name,
+        technician_id: techId || undefined,
+        splitters: location.splitters,
+      })
+      toast.success("Technician updated successfully!")
+    } catch (error) {
+      toast.error("Failed to update technician")
+      setSelectedTechnicianId(location.technician_id || "")
     }
   }
 
@@ -118,6 +136,21 @@ export function LocationDetailsModal({ open, onOpenChange, location }: LocationD
 
           <div className="flex-1 overflow-y-auto p-4 sm:p-6">
             <div className="space-y-4 sm:space-y-6">
+              <div>
+                <h3 className="font-semibold text-slate-200 mb-2 text-base sm:text-xl">Assigned Technician</h3>
+                <select
+                  value={selectedTechnicianId}
+                  onChange={(e) => handleUpdateTechnician(e.target.value)}
+                  className="w-full border border-slate-600 bg-slate-700 text-white rounded px-3 py-2 text-sm"
+                >
+                  <option value="">No technician assigned</option>
+                  {technicians.map((tech) => (
+                    <option key={tech.id} value={tech.id}>
+                      {tech.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <h3 className="font-semibold text-slate-200 mb-4 text-base sm:text-xl">Splitters ({location.splitters.length})</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
