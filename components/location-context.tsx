@@ -62,14 +62,18 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       // Fetch technicians
       const { data: techniciansData, error: techError } = await supabase.from("technicians").select("*").order("name")
       
+      console.log("[v0] Technicians fetch - error code:", techError?.code, "error:", techError?.message)
+      
       // If technicians table doesn't exist, initialize with sample data
-      if (techError?.code === "PGRST116") {
+      if (techError?.code === "PGRST116" || techError?.message?.includes("Could not find the table")) {
         console.log("[v0] Technicians table doesn't exist yet. Using fallback data.")
-        setTechnicians([
+        const fallbackTechnicians = [
           { id: "1", name: "ngaira" },
           { id: "2", name: "kioko" },
           { id: "3", name: "tum" },
-        ])
+        ]
+        console.log("[v0] Setting technicians:", fallbackTechnicians)
+        setTechnicians(fallbackTechnicians)
       } else if (techError) {
         console.error("[v0] Error fetching technicians:", techError)
         setTechnicians([])
@@ -87,25 +91,50 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         if (splittersError) throw splittersError
         const splittersData = splitters || []
 
-        const transformedLocations: Location[] = locationsData.map((loc: any) => ({
-          id: loc.id,
-          name: loc.name,
-          notes: loc.notes,
-          technician_id: loc.technician_id,
-          technician: (techniciansData || []).find((t: any) => t.id === loc.technician_id),
-          splitters: splittersData
-            .filter((s: any) => s.location_id === loc.id)
-            .map((s: any) => ({
-              id: s.id,
-              model: s.model,
-              port: s.port,
-              notes: s.notes || "",
-              location_id: s.location_id,
-            })),
-        }))
+        // Get current technicians list (either from database or fallback)
+        const currentTechnicians = techniciansData || [
+          { id: "1", name: "ngaira" },
+          { id: "2", name: "kioko" },
+          { id: "3", name: "tum" },
+        ]
+
+        const transformedLocations: Location[] = locationsData.map((loc: any) => {
+          // Use ngaira's ID for all locations that don't have a technician assigned
+          const assignedTechnicianId = loc.technician_id || "1"
+          
+          return {
+            id: loc.id,
+            name: loc.name,
+            notes: loc.notes,
+            technician_id: assignedTechnicianId,
+            technician: currentTechnicians.find((t: any) => t.id === assignedTechnicianId),
+            splitters: splittersData
+              .filter((s: any) => s.location_id === loc.id)
+              .map((s: any) => ({
+                id: s.id,
+                model: s.model,
+                port: s.port,
+                notes: s.notes || "",
+                location_id: s.location_id,
+              })),
+          }
+        })
 
         setLocations(transformedLocations)
         localStorage.setItem(STORAGE_KEY, JSON.stringify(transformedLocations))
+
+        // Update all locations in database to have ngaira (id: "1") as technician if not already assigned
+        if (techError?.code === "PGRST116") {
+          console.log("[v0] Updating all locations to assign ngaira as technician")
+          for (const loc of locationsData) {
+            if (!loc.technician_id) {
+              await supabase
+                .from("locations")
+                .update({ technician_id: "1" })
+                .eq("id", loc.id)
+            }
+          }
+        }
       } else {
         setLocations([])
         localStorage.setItem(STORAGE_KEY, JSON.stringify([]))
