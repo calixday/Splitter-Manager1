@@ -189,6 +189,9 @@ export function LocationCard({ location, highlightQuery = "", highlightType = "s
                       }`}>
                         Port: {splitter.port}
                       </p>
+                      {splitter.technician && <p className={`text-xs font-medium mt-1 ${
+                        isSplitterMatching ? "text-red-300" : "text-slate-300"
+                      }`}>Technician: {splitter.technician}</p>}
                       {splitter.notes && <p className={`text-xs mt-1 line-clamp-2 ${
                         isSplitterMatching ? "text-red-300" : "text-slate-400"
                       }`}>{splitter.notes}</p>}

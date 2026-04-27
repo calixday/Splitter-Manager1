@@ -21,6 +21,7 @@ export function EditSplitterModal({ open, onOpenChange, locationId, splitter }: 
   const [splitterModel, setSplitterModel] = useState("")
   const [splitterPort, setSplitterPort] = useState("")
   const [splitterNotes, setSplitterNotes] = useState("")
+  const [splitterTechnician, setSplitterTechnician] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export function EditSplitterModal({ open, onOpenChange, locationId, splitter }: 
       setSplitterModel(splitter.model)
       setSplitterPort(splitter.port)
       setSplitterNotes(splitter.notes || "")
+      setSplitterTechnician(splitter.technician || "")
     }
   }, [open, splitter])
 
@@ -46,6 +48,7 @@ export function EditSplitterModal({ open, onOpenChange, locationId, splitter }: 
         model: splitterModel.trim(),
         port: splitterPort.trim(),
         notes: splitterNotes.trim() || undefined,
+        technician: splitterTechnician.trim() || undefined,
         location_id: locationId,
       })
 
@@ -101,6 +104,18 @@ export function EditSplitterModal({ open, onOpenChange, locationId, splitter }: 
               placeholder="e.g., Black tape, Thin patch cord"
               value={splitterNotes}
               onChange={(e) => setSplitterNotes(e.target.value)}
+              className="border-border bg-background text-foreground"
+            />
+          </div>
+          <div>
+            <Label htmlFor="edit-technician" className="text-foreground">
+              Technician Name (Optional)
+            </Label>
+            <Input
+              id="edit-technician"
+              placeholder="e.g., Kioko, Tum, Jonah"
+              value={splitterTechnician}
+              onChange={(e) => setSplitterTechnician(e.target.value)}
               className="border-border bg-background text-foreground"
             />
           </div>

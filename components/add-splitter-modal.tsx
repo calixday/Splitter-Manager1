@@ -22,6 +22,7 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
   const [splitterModel, setSplitterModel] = useState(PREDEFINED_MODELS[0])
   const [splitterPort, setSplitterPort] = useState("")
   const [splitterNotes, setSplitterNotes] = useState("")
+  const [splitterTechnician, setSplitterTechnician] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showModelInput, setShowModelInput] = useState(false)
 
@@ -50,11 +51,13 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
         model: splitterModel,
         port: splitterPort,
         notes: splitterNotes || undefined,
+        technician: splitterTechnician || undefined,
       })
 
       setSplitterModel("")
       setSplitterPort("")
       setSplitterNotes("")
+      setSplitterTechnician("")
       setShowModelInput(false)
       onOpenChange(false)
       toast.success("Splitter added successfully!")
@@ -152,6 +155,19 @@ export function AddSplitterModal({ open, onOpenChange, locationId }: AddSplitter
               placeholder="e.g., Black tape, Thin patch cord"
               value={splitterNotes}
               onChange={(e) => setSplitterNotes(e.target.value)}
+              className="border-border bg-background text-foreground mt-2 text-sm"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="technician" className="text-foreground text-sm">
+              Technician Name (Optional)
+            </Label>
+            <Input
+              id="technician"
+              placeholder="e.g., Kioko, Tum, Jonah"
+              value={splitterTechnician}
+              onChange={(e) => setSplitterTechnician(e.target.value)}
               className="border-border bg-background text-foreground mt-2 text-sm"
             />
           </div>
