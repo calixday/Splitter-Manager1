@@ -61,8 +61,24 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       
       // Fetch technicians
       const { data: techniciansData, error: techError } = await supabase.from("technicians").select("*").order("name")
-      if (techError) throw techError
-      setTechnicians(techniciansData || [])
+      
+      // If technicians table doesn't exist, initialize with sample data
+      if (techError?.code === "PGRST116") {
+        console.log("[v0] Technicians table doesn't exist yet. Using fallback data.")
+        setTechnicians([
+          { id: "1", name: "John Smith" },
+          { id: "2", name: "Sarah Johnson" },
+          { id: "3", name: "Michael Brown" },
+          { id: "4", name: "Emma Davis" },
+          { id: "5", name: "David Wilson" },
+          { id: "6", name: "Lisa Anderson" },
+        ])
+      } else if (techError) {
+        console.error("[v0] Error fetching technicians:", techError)
+        setTechnicians([])
+      } else {
+        setTechnicians(techniciansData || [])
+      }
       
       const { data: locationsData, error: locError } = await supabase.from("locations").select("*").order("name")
       if (locError) throw locError

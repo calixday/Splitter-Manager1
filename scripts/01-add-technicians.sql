@@ -1,28 +1,30 @@
 -- Create technicians table
-CREATE TABLE IF NOT EXISTS technicians (
+CREATE TABLE IF NOT EXISTS public.technicians (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT NOT NULL UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Add technician_id column to locations table if it doesn't exist
-ALTER TABLE locations
-ADD COLUMN IF NOT EXISTS technician_id UUID REFERENCES technicians(id) ON DELETE SET NULL;
+ALTER TABLE public.locations
+ADD COLUMN IF NOT EXISTS technician_id UUID REFERENCES public.technicians(id) ON DELETE SET NULL;
 
 -- Enable RLS on technicians table
-ALTER TABLE technicians ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.technicians ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policy for technicians table
-CREATE POLICY "Allow all access to technicians" ON technicians
+CREATE POLICY "Allow all access to technicians" ON public.technicians
   FOR ALL
   USING (true)
   WITH CHECK (true);
 
--- Insert sample technicians for testing
-INSERT INTO technicians (name) VALUES
+-- Insert sample technicians
+INSERT INTO public.technicians (name) VALUES
   ('John Smith'),
   ('Sarah Johnson'),
   ('Michael Brown'),
-  ('Emma Davis')
-ON CONFLICT DO NOTHING;
+  ('Emma Davis'),
+  ('David Wilson'),
+  ('Lisa Anderson')
+ON CONFLICT (name) DO NOTHING;
