@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 import { useLocations } from "./location-context"
 import { LocationList } from "./location-list"
 import { SearchBar } from "./search-bar"
@@ -11,8 +11,6 @@ export function SplitterDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [searchType, setSearchType] = useState<"location" | "splitter" | "technician">("splitter")
   const [showAddModal, setShowAddModal] = useState(false)
-  const [showSearchModal, setShowSearchModal] = useState(false)
-  const searchModalRef = useRef<HTMLDivElement>(null)
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null)
 
   const totalLocations = locations.length
@@ -32,29 +30,7 @@ export function SplitterDashboard() {
     }
   })
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (searchModalRef.current && !searchModalRef.current.contains(e.target as Node)) {
-        setShowSearchModal(false)
-        // Don't clear search query - keep it for highlighting
-      }
-    }
 
-    const handleScroll = () => {
-      setShowSearchModal(false)
-      // Don't clear search query - keep it for highlighting
-    }
-
-    if (showSearchModal) {
-      document.addEventListener("mousedown", handleClickOutside)
-      window.addEventListener("scroll", handleScroll)
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-      window.removeEventListener("scroll", handleScroll)
-    }
-  }, [showSearchModal])
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col">
@@ -83,13 +59,6 @@ export function SplitterDashboard() {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
-                onClick={() => setShowSearchModal(!showSearchModal)}
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-blue-700 active:shadow-md transition-all flex items-center justify-center font-bold text-base sm:text-lg touch-manipulation"
-                aria-label="Search"
-              >
-                🔍
-              </button>
-              <button
                 onClick={() => setShowAddModal(true)}
                 disabled={isLoading}
                 className="text-xs sm:text-sm px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-lg transition-colors disabled:opacity-50 touch-manipulation"
@@ -102,31 +71,27 @@ export function SplitterDashboard() {
       </header>
 
       <main className="flex-1 mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {showSearchModal && (
-          <div
-            ref={searchModalRef}
-            className="fixed inset-x-3 sm:right-4 top-1/2 sm:top-auto sm:bottom-auto transform -translate-y-1/2 sm:translate-y-0 w-auto max-w-xs sm:w-96 rounded-lg sm:rounded-xl bg-slate-800 border border-slate-700 shadow-2xl p-3 sm:p-4 z-50"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-slate-100">Search</h2>
+        {/* Search Bar - Always Visible */}
+        <div className="mb-6 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-slate-800 border border-slate-700 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-slate-100">🔍 Search</h2>
+            {searchQuery && (
               <button
-                onClick={() => {
-                  setShowSearchModal(false)
-                }}
-                className="text-slate-400 hover:text-slate-200 text-xl"
-                title="Close search"
+                onClick={() => setSearchQuery("")}
+                className="text-slate-400 hover:text-slate-200 text-sm"
+                title="Clear search"
               >
-                ✕
+                Clear
               </button>
-            </div>
-            <SearchBar
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              searchType={searchType}
-              setSearchType={setSearchType}
-            />
+            )}
           </div>
-        )}
+          <SearchBar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            searchType={searchType}
+            setSearchType={setSearchType}
+          />
+        </div>
 
         {/* Search Results Header */}
         {searchQuery && (
