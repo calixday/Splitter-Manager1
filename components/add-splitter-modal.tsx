@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-const PREDEFINED_MODELS = ["JT C650", "ADHS 1 C650", "ADHS 2 C650", "NRB MILIMANI C620", "KAREN C650", "RUBIA C650"]
+const PREDEFINED_MODELS = ["JT C650", "ADHS C650 1", "ADHS C650 2", "NRB MILIMANI C650", "KAREN C650", "RUBIA C650"]
 
 interface AddSplitterModalProps {
   open: boolean

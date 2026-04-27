@@ -57,48 +57,81 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
   const fetchLocations = useCallback(async () => {
     try {
-      console.log("[v0] Fetching locations...")
-      
       // Fetch technicians
       const { data: techniciansData, error: techError } = await supabase.from("technicians").select("*").order("name")
-      if (techError) throw techError
-      setTechnicians(techniciansData || [])
+      
+      // If technicians table doesn't exist, initialize with sample data
+      if (techError?.code === "PGRST116" || techError?.message?.includes("Could not find the table")) {
+        const fallbackTechnicians = [
+          { id: "1", name: "ngaira" },
+          { id: "2", name: "kioko" },
+          { id: "3", name: "tum" },
+        ]
+        setTechnicians(fallbackTechnicians)
+      } else if (techError) {
+        console.error("Error fetching technicians:", techError)
+        setTechnicians([])
+      } else {
+        setTechnicians(techniciansData || [])
+      }
       
       const { data: locationsData, error: locError } = await supabase.from("locations").select("*").order("name")
       if (locError) throw locError
-
-      console.log("[v0] Locations data received:", locationsData)
 
       if (locationsData && locationsData.length > 0) {
         const { data: splitters, error: splittersError } = await supabase.from("splitters").select("*")
         if (splittersError) throw splittersError
         const splittersData = splitters || []
 
-        const transformedLocations: Location[] = locationsData.map((loc: any) => ({
-          id: loc.id,
-          name: loc.name,
-          notes: loc.notes,
-          technician_id: loc.technician_id,
-          technician: (techniciansData || []).find((t: any) => t.id === loc.technician_id),
-          splitters: splittersData
-            .filter((s: any) => s.location_id === loc.id)
-            .map((s: any) => ({
-              id: s.id,
-              model: s.model,
-              port: s.port,
-              notes: s.notes || "",
-              location_id: s.location_id,
-            })),
-        }))
+        // Get current technicians list (either from database or fallback)
+        const currentTechnicians = techniciansData || [
+          { id: "1", name: "ngaira" },
+          { id: "2", name: "kioko" },
+          { id: "3", name: "tum" },
+        ]
+
+        const transformedLocations: Location[] = locationsData.map((loc: any) => {
+          // Use ngaira's ID for all locations that don't have a technician assigned
+          const assignedTechnicianId = loc.technician_id || "1"
+          
+          return {
+            id: loc.id,
+            name: loc.name,
+            notes: loc.notes,
+            technician_id: assignedTechnicianId,
+            technician: currentTechnicians.find((t: any) => t.id === assignedTechnicianId),
+            splitters: splittersData
+              .filter((s: any) => s.location_id === loc.id)
+              .map((s: any) => ({
+                id: s.id,
+                model: s.model,
+                port: s.port,
+                notes: s.notes || "",
+                location_id: s.location_id,
+              })),
+          }
+        })
 
         setLocations(transformedLocations)
         localStorage.setItem(STORAGE_KEY, JSON.stringify(transformedLocations))
+
+        // Update all locations in database to have ngaira (id: "1") as technician if not already assigned
+        if (techError?.code === "PGRST116") {
+          for (const loc of locationsData) {
+            if (!loc.technician_id) {
+              await supabase
+                .from("locations")
+                .update({ technician_id: "1" })
+                .eq("id", loc.id)
+            }
+          }
+        }
       } else {
         setLocations([])
         localStorage.setItem(STORAGE_KEY, JSON.stringify([]))
       }
     } catch (error) {
-      console.error("[v0] Error fetching locations:", error)
+      console.error("Error fetching locations:", error)
       setLocations([])
     }
   }, [])
@@ -107,25 +140,20 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     // Subscribe to locations table changes
     const locationsChannel = supabase
       .channel("locations_changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "locations" }, (payload) => {
-        console.log("[v0] Locations change detected:", payload.eventType)
+      .on("postgres_changes", { event: "*", schema: "public", table: "locations" }, () => {
         fetchLocations()
       })
       .subscribe((status) => {
-        console.log("[v0] Locations subscription status:", status)
         if (status === "SUBSCRIBED") setIsConnected(true)
       })
 
     // Subscribe to splitters table changes
     const splittersChannel = supabase
       .channel("splitters_changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "splitters" }, (payload) => {
-        console.log("[v0] Splitters change detected:", payload.eventType)
+      .on("postgres_changes", { event: "*", schema: "public", table: "splitters" }, () => {
         fetchLocations()
       })
-      .subscribe((status) => {
-        console.log("[v0] Splitters subscription status:", status)
-      })
+      .subscribe()
 
     subscriptionsRef.current = [locationsChannel, splittersChannel]
 
@@ -141,7 +169,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         await fetchLocations()
         setupRealtimeSubscription()
       } catch (error) {
-        console.error("[v0] Initialization error:", error)
+        console.error("Initialization error:", error)
       } finally {
         setIsLoading(false)
       }
@@ -179,8 +207,6 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
         if (splitterError) throw splitterError
       }
-
-      console.log("[v0] Location added to Supabase")
     } catch (error) {
       console.error("[v0] Error adding location:", error)
       throw error
@@ -198,8 +224,6 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         .eq("id", id)
 
       if (error) throw error
-
-      console.log("[v0] Location updated in Supabase")
     } catch (error) {
       console.error("[v0] Error updating location:", error)
       throw error
@@ -211,8 +235,6 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.from("locations").delete().eq("id", id)
 
       if (error) throw error
-
-      console.log("[v0] Location deleted from Supabase")
     } catch (error) {
       console.error("[v0] Error deleting location:", error)
       throw error
@@ -230,8 +252,6 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (error) throw error
-
-      console.log("[v0] Splitter added to Supabase")
     } catch (error) {
       console.error("[v0] Error adding splitter:", error)
       throw error
@@ -250,8 +270,6 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         .eq("id", splitterId)
 
       if (error) throw error
-
-      console.log("[v0] Splitter updated in Supabase")
     } catch (error) {
       console.error("[v0] Error updating splitter:", error)
       throw error
@@ -263,8 +281,6 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.from("splitters").delete().eq("id", splitterId)
 
       if (error) throw error
-
-      console.log("[v0] Splitter deleted from Supabase")
     } catch (error) {
       console.error("[v0] Error deleting splitter:", error)
       throw error
