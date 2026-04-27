@@ -192,6 +192,11 @@ export function LocationCard({ location, highlightQuery = "", highlightType = "s
                       {splitter.notes && <p className={`text-xs mt-1 line-clamp-2 ${
                         isSplitterMatching ? "text-red-300" : "text-slate-400"
                       }`}>{splitter.notes}</p>}
+                      {isSplitterMatching && location.technician && (
+                        <p className="text-xs mt-2 font-bold text-yellow-300 bg-yellow-500/20 px-2 py-1 rounded inline-block">
+                          Technician: {location.technician.name}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
