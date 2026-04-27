@@ -36,55 +36,40 @@ export function SplitterDashboard() {
     <div className="min-h-screen bg-slate-950 flex flex-col">
       <header className="border-b border-slate-800 bg-slate-900 shadow-sm sticky top-0 z-40">
         <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-3 sm:py-4 gap-3">
+          <div className="flex items-center justify-between py-2.5 sm:py-3 gap-2 sm:gap-3">
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent line-clamp-1">
-                SPLITTER MANAGER
+              <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent line-clamp-1">
+                SPLITTER MGR
               </h1>
-              <div className="flex items-center gap-2 sm:gap-4 mt-2 flex-wrap">
-                <p className="text-xs sm:text-sm text-slate-400 truncate">Nairobi South 1</p>
-                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2 py-1 text-xs font-medium text-blue-300">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0"></span>
-                    <span className="hidden sm:inline">{totalLocations} locations</span>
-                    <span className="sm:hidden">{totalLocations}L</span>
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/20 px-2 py-1 text-xs font-medium text-purple-300">
-                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400 flex-shrink-0"></span>
-                    <span className="hidden sm:inline">{totalSplitters} splitters</span>
-                    <span className="sm:hidden">{totalSplitters}S</span>
-                  </span>
-                </div>
+              <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap text-xs sm:text-sm">
+                <span className="text-slate-400">Nairobi South 1</span>
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-blue-500/20 px-1.5 py-0.5 text-xs font-medium text-blue-300">
+                  <span className="w-1 h-1 rounded-full bg-blue-400"></span>
+                  <span className="hidden sm:inline">{totalLocations}L</span>
+                  <span className="sm:hidden">{totalLocations}</span>
+                </span>
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-purple-500/20 px-1.5 py-0.5 text-xs font-medium text-purple-300">
+                  <span className="w-1 h-1 rounded-full bg-purple-400"></span>
+                  <span className="hidden sm:inline">{totalSplitters}S</span>
+                  <span className="sm:hidden">{totalSplitters}</span>
+                </span>
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <button
-                onClick={() => setShowAddModal(true)}
-                disabled={isLoading}
-                className="text-xs sm:text-sm px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-lg transition-colors disabled:opacity-50 touch-manipulation"
-              >
-                + Add
-              </button>
-            </div>
+            <button
+              onClick={() => setShowAddModal(true)}
+              disabled={isLoading}
+              className="text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-lg transition-colors disabled:opacity-50 touch-manipulation font-medium flex-shrink-0"
+            >
+              <span className="hidden sm:inline">+ Add Location</span>
+              <span className="sm:hidden">+ Add</span>
+            </button>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Search Bar - Always Visible */}
-        <div className="mb-6 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-slate-800 border border-slate-700 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-100">🔍 Search</h2>
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="text-slate-400 hover:text-slate-200 text-sm"
-                title="Clear search"
-              >
-                Clear
-              </button>
-            )}
-          </div>
+      <main className="flex-1 mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8 py-3 sm:py-6">
+        {/* Search Bar - Compact and Always Visible */}
+        <div className="mb-4 p-2 sm:p-3 rounded-lg bg-slate-800 border border-slate-700 shadow-sm">
           <SearchBar
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -95,20 +80,10 @@ export function SplitterDashboard() {
 
         {/* Search Results Header */}
         {searchQuery && (
-          <div className="flex items-center justify-between mb-4 p-3 sm:p-4 bg-slate-800/50 rounded-lg border border-red-500/30">
-            <div className="flex items-center gap-2">
-              <span className="text-red-400 text-lg">●</span>
-              <p className="text-sm text-slate-200">
-                Searching for <span className="font-semibold text-red-400">"{searchQuery}"</span> in {searchType}s
-              </p>
-            </div>
-            <button
-              onClick={() => setSearchQuery("")}
-              className="text-red-400 hover:text-red-300 text-lg transition-colors touch-manipulation"
-              title="Clear search"
-            >
-              ✕
-            </button>
+          <div className="flex items-center justify-between mb-3 p-2 sm:p-3 bg-slate-800/50 rounded-lg border border-red-500/30">
+            <p className="text-xs sm:text-sm text-slate-200">
+              <span className="text-red-400">●</span> Searching: <span className="font-semibold text-red-400">"{searchQuery}"</span> in <span className="capitalize">{searchType}</span>
+            </p>
           </div>
         )}
 
