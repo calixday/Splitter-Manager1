@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button"
 interface SearchBarProps {
   searchQuery: string
   setSearchQuery: (query: string) => void
-  searchType: "location" | "splitter" | "technician"
-  setSearchType: (type: "location" | "splitter" | "technician") => void
+  searchType: "location" | "splitter"
+  setSearchType: (type: "location" | "splitter") => void
 }
 
 export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchType }: SearchBarProps) {
@@ -33,7 +33,7 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
     <div className="space-y-2 w-full">
       <div className="relative flex items-center w-full">
         <Input
-          placeholder={searchType === "location" ? "Search location..." : searchType === "technician" ? "Search technician (e.g., Kioko)..." : "Search splitter (e.g., 7/9)..."}
+          placeholder={searchType === "location" ? "Search location..." : "Search splitter (e.g., 7/9)..."}
           value={searchQuery}
           onChange={handleSearchChange}
           className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 min-h-[2.5rem]"
@@ -66,14 +66,6 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
           className="text-xs flex-1 py-2 h-auto"
         >
           Location
-        </Button>
-        <Button
-          variant={searchType === "technician" ? "default" : "outline"}
-          onClick={() => setSearchType("technician")}
-          size="sm"
-          className="text-xs flex-1 py-2 h-auto"
-        >
-          Technician
         </Button>
       </div>
     </div>

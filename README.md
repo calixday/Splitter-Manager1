@@ -1,2 +1,0 @@
-# South1SplitterManager
-

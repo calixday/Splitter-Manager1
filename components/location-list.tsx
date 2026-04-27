@@ -6,7 +6,7 @@ import { LocationCard } from "./location-card"
 interface LocationListProps {
   locations: Location[]
   searchQuery?: string
-  searchType?: "location" | "splitter" | "technician"
+  searchType?: "location" | "splitter"
 }
 
 export function LocationList({ locations, searchQuery = "", searchType = "splitter" }: LocationListProps) {

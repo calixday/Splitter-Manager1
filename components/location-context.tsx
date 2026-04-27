@@ -14,22 +14,14 @@ export interface Splitter {
   location_id?: string
 }
 
-export interface Technician {
-  id: string
-  name: string
-}
-
 export interface Location {
   id: string
   name: string
   splitters: Splitter[]
-  technician_id?: string
-  technician?: Technician
 }
 
 interface LocationContextType {
   locations: Location[]
-  technicians: Technician[]
   addLocation: (location: Location) => Promise<void>
   updateLocation: (id: string, location: Location) => Promise<void>
   deleteLocation: (id: string) => Promise<void>
@@ -50,7 +42,6 @@ function generateUUID(): string {
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [locations, setLocations] = useState<Location[]>([])
-  const [technicians, setTechnicians] = useState<Technician[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isConnected, setIsConnected] = useState(false)
   const subscriptionsRef = useRef<any[]>([])
@@ -58,12 +49,6 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const fetchLocations = useCallback(async () => {
     try {
       console.log("[v0] Fetching locations...")
-      
-      // Fetch technicians
-      const { data: techniciansData, error: techError } = await supabase.from("technicians").select("*").order("name")
-      if (techError) throw techError
-      setTechnicians(techniciansData || [])
-      
       const { data: locationsData, error: locError } = await supabase.from("locations").select("*").order("name")
       if (locError) throw locError
 
@@ -78,8 +63,6 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           id: loc.id,
           name: loc.name,
           notes: loc.notes,
-          technician_id: loc.technician_id,
-          technician: (techniciansData || []).find((t: any) => t.id === loc.technician_id),
           splitters: splittersData
             .filter((s: any) => s.location_id === loc.id)
             .map((s: any) => ({
@@ -161,7 +144,6 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       const { error: locError } = await supabase.from("locations").insert({
         id: locationId,
         name: location.name,
-        technician_id: location.technician_id || null,
       })
 
       if (locError) throw locError
@@ -191,10 +173,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     try {
       const { error } = await supabase
         .from("locations")
-        .update({ 
-          name: updatedLocation.name,
-          technician_id: updatedLocation.technician_id || null,
-        })
+        .update({ name: updatedLocation.name })
         .eq("id", id)
 
       if (error) throw error
@@ -275,7 +254,6 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     <LocationContext.Provider
       value={{
         locations,
-        technicians,
         addLocation,
         updateLocation,
         deleteLocation,
