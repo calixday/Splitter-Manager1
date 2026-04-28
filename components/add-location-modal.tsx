@@ -40,8 +40,9 @@ export function AddLocationModal({ open, onOpenChange, teamId }: AddLocationModa
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const finalModel = showModelInput ? customModel : splitterModel
+    
     if (!locationName.trim() || !finalModel.trim() || !splitterPort.trim()) {
-      alert("Please fill in all required fields")
+      toast.error("Please fill in all required fields")
       return
     }
 

@@ -141,6 +141,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     const locationsChannel = supabase
       .channel("locations_changes")
       .on("postgres_changes", { event: "*", schema: "public", table: "locations" }, () => {
+        // Re-fetch locations when data changes
         fetchLocations()
       })
       .subscribe((status) => {
@@ -151,6 +152,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     const splittersChannel = supabase
       .channel("splitters_changes")
       .on("postgres_changes", { event: "*", schema: "public", table: "splitters" }, () => {
+        // Re-fetch locations when splitters change
         fetchLocations()
       })
       .subscribe()
@@ -161,13 +163,15 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       locationsChannel.unsubscribe()
       splittersChannel.unsubscribe()
     }
-  }, [fetchLocations])
+  }, []) // Empty dependency array - we'll handle fetchLocations differently
 
   useEffect(() => {
     const initialize = async () => {
       try {
         await fetchLocations()
-        setupRealtimeSubscription()
+        const cleanup = setupRealtimeSubscription()
+        // Store cleanup function for later
+        return cleanup
       } catch (error) {
         console.error("Initialization error:", error)
       } finally {
@@ -175,10 +179,14 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    initialize()
+    let cleanupFn: (() => void) | undefined
+    initialize().then((fn) => {
+      cleanupFn = fn
+    })
 
     // Cleanup subscriptions on unmount
     return () => {
+      cleanupFn?.()
       subscriptionsRef.current.forEach((channel) => channel?.unsubscribe())
     }
   }, [fetchLocations, setupRealtimeSubscription])
