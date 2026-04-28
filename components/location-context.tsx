@@ -91,24 +91,38 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         ]
 
         const transformedLocations: Location[] = locationsData.map((loc: any) => {
-          // Use ngaira's ID for all locations that don't have a technician assigned
-          const assignedTechnicianId = loc.technician_id || "1"
+          // Get splitters for this location
+          const locationSplitters = splittersData.filter((s: any) => s.location_id === loc.id)
+          
+          // Determine technician from splitters' technician field, or from location's technician_id, or default to ngaira
+          let assignedTechnician = null
+          
+          if (locationSplitters.length > 0 && locationSplitters[0].technician) {
+            // Get technician name from first splitter (all splitters in a location should have same technician)
+            const technicianName = locationSplitters[0].technician
+            // Find the technician object by name
+            assignedTechnician = currentTechnicians.find((t: any) => t.name.toLowerCase() === technicianName.toLowerCase())
+          } else if (loc.technician_id) {
+            // Fallback to technician_id if available
+            assignedTechnician = currentTechnicians.find((t: any) => t.id === loc.technician_id)
+          } else {
+            // Default to ngaira
+            assignedTechnician = currentTechnicians.find((t: any) => t.id === "1" || t.name.toLowerCase() === "ngaira")
+          }
           
           return {
             id: loc.id,
             name: loc.name,
             notes: loc.notes,
-            technician_id: assignedTechnicianId,
-            technician: currentTechnicians.find((t: any) => t.id === assignedTechnicianId),
-            splitters: splittersData
-              .filter((s: any) => s.location_id === loc.id)
-              .map((s: any) => ({
-                id: s.id,
-                model: s.model,
-                port: s.port,
-                notes: s.notes || "",
-                location_id: s.location_id,
-              })),
+            technician_id: assignedTechnician?.id,
+            technician: assignedTechnician,
+            splitters: locationSplitters.map((s: any) => ({
+              id: s.id,
+              model: s.model,
+              port: s.port,
+              notes: s.notes || "",
+              location_id: s.location_id,
+            })),
           }
         })
 
