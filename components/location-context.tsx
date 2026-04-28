@@ -91,24 +91,38 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         ]
 
         const transformedLocations: Location[] = locationsData.map((loc: any) => {
-          // Use ngaira's ID for all locations that don't have a technician assigned
-          const assignedTechnicianId = loc.technician_id || "1"
+          // Get splitters for this location
+          const locationSplitters = splittersData.filter((s: any) => s.location_id === loc.id)
+          
+          // Determine technician from splitters' technician field, or from location's technician_id, or default to ngaira
+          let assignedTechnician = null
+          
+          if (locationSplitters.length > 0 && locationSplitters[0].technician) {
+            // Get technician name from first splitter (all splitters in a location should have same technician)
+            const technicianName = locationSplitters[0].technician
+            // Find the technician object by name
+            assignedTechnician = currentTechnicians.find((t: any) => t.name.toLowerCase() === technicianName.toLowerCase())
+          } else if (loc.technician_id) {
+            // Fallback to technician_id if available
+            assignedTechnician = currentTechnicians.find((t: any) => t.id === loc.technician_id)
+          } else {
+            // Default to ngaira
+            assignedTechnician = currentTechnicians.find((t: any) => t.id === "1" || t.name.toLowerCase() === "ngaira")
+          }
           
           return {
             id: loc.id,
             name: loc.name,
             notes: loc.notes,
-            technician_id: assignedTechnicianId,
-            technician: currentTechnicians.find((t: any) => t.id === assignedTechnicianId),
-            splitters: splittersData
-              .filter((s: any) => s.location_id === loc.id)
-              .map((s: any) => ({
-                id: s.id,
-                model: s.model,
-                port: s.port,
-                notes: s.notes || "",
-                location_id: s.location_id,
-              })),
+            technician_id: assignedTechnician?.id,
+            technician: assignedTechnician,
+            splitters: locationSplitters.map((s: any) => ({
+              id: s.id,
+              model: s.model,
+              port: s.port,
+              notes: s.notes || "",
+              location_id: s.location_id,
+            })),
           }
         })
 
@@ -141,6 +155,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     const locationsChannel = supabase
       .channel("locations_changes")
       .on("postgres_changes", { event: "*", schema: "public", table: "locations" }, () => {
+        // Re-fetch locations when data changes
         fetchLocations()
       })
       .subscribe((status) => {
@@ -151,6 +166,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     const splittersChannel = supabase
       .channel("splitters_changes")
       .on("postgres_changes", { event: "*", schema: "public", table: "splitters" }, () => {
+        // Re-fetch locations when splitters change
         fetchLocations()
       })
       .subscribe()
@@ -161,13 +177,15 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       locationsChannel.unsubscribe()
       splittersChannel.unsubscribe()
     }
-  }, [fetchLocations])
+  }, []) // Empty dependency array - we'll handle fetchLocations differently
 
   useEffect(() => {
     const initialize = async () => {
       try {
         await fetchLocations()
-        setupRealtimeSubscription()
+        const cleanup = setupRealtimeSubscription()
+        // Store cleanup function for later
+        return cleanup
       } catch (error) {
         console.error("Initialization error:", error)
       } finally {
@@ -175,10 +193,14 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    initialize()
+    let cleanupFn: (() => void) | undefined
+    initialize().then((fn) => {
+      cleanupFn = fn
+    })
 
     // Cleanup subscriptions on unmount
     return () => {
+      cleanupFn?.()
       subscriptionsRef.current.forEach((channel) => channel?.unsubscribe())
     }
   }, [fetchLocations, setupRealtimeSubscription])
@@ -186,15 +208,29 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const addLocation = async (location: Location) => {
     try {
       const locationId = generateUUID()
+      console.log("[v0] Adding location:", { locationId, name: location.name, splitterCount: location.splitters.length })
+      
       const { error: locError } = await supabase.from("locations").insert({
         id: locationId,
         name: location.name,
-        technician_id: location.technician_id || null,
+        // Note: technician_id column may not exist in older databases
+        // Technician is determined from splitters instead
       })
 
-      if (locError) throw locError
+      if (locError) {
+        console.error("[v0] Location insert error:", locError)
+        throw locError
+      }
+      console.log("[v0] Location inserted successfully")
 
       if (location.splitters.length > 0) {
+        console.log("[v0] Inserting splitters with technician assignment...")
+        
+        // Get the selected technician name from the technician_id
+        const selectedTechnician = technicians.find((t) => t.id === location.technician_id)
+        const technicianName = selectedTechnician?.name || "ngaira"
+        console.log("[v0] Using technician:", technicianName)
+        
         const { error: splitterError } = await supabase.from("splitters").insert(
           location.splitters.map((s) => ({
             id: generateUUID(),
@@ -202,11 +238,21 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
             model: s.model,
             port: s.port,
             notes: s.notes || "",
+            technician: technicianName, // Use selected technician
           })),
         )
 
-        if (splitterError) throw splitterError
+        if (splitterError) {
+          console.error("[v0] Splitter insert error:", splitterError)
+          throw splitterError
+        }
+        console.log("[v0] Splitters inserted successfully with technician:", technicianName)
       }
+
+      // Refetch locations to update the UI
+      console.log("[v0] Refetching locations...")
+      await fetchLocations()
+      console.log("[v0] Location added successfully!")
     } catch (error) {
       console.error("[v0] Error adding location:", error)
       throw error
@@ -215,15 +261,26 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
   const updateLocation = async (id: string, updatedLocation: Location) => {
     try {
+      console.log("[v0] Updating location:", { id, name: updatedLocation.name })
+      
       const { error } = await supabase
         .from("locations")
         .update({ 
           name: updatedLocation.name,
-          technician_id: updatedLocation.technician_id || null,
+          // Note: technician_id column may not exist in older databases
+          // Technician is determined from splitters instead
         })
         .eq("id", id)
 
-      if (error) throw error
+      if (error) {
+        console.error("[v0] Location update error:", error)
+        throw error
+      }
+      console.log("[v0] Location updated successfully")
+
+      // Refetch locations to update the UI
+      console.log("[v0] Refetching locations...")
+      await fetchLocations()
     } catch (error) {
       console.error("[v0] Error updating location:", error)
       throw error
@@ -235,6 +292,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.from("locations").delete().eq("id", id)
 
       if (error) throw error
+
+      // Refetch locations to update the UI
+      await fetchLocations()
     } catch (error) {
       console.error("[v0] Error deleting location:", error)
       throw error
@@ -243,15 +303,29 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
   const addSplitterToLocation = async (locationId: string, splitter: Splitter) => {
     try {
+      // Find the location to get its current technician
+      const location = locations.find(l => l.id === locationId)
+      const technicianName = location?.technician?.name || "ngaira"
+      
+      console.log("[v0] Adding splitter to location:", locationId, "with technician:", technicianName)
+      
       const { error } = await supabase.from("splitters").insert({
         id: generateUUID(),
         location_id: locationId,
         model: splitter.model,
         port: splitter.port,
         notes: splitter.notes || "",
+        technician: technicianName, // Preserve the technician assignment
       })
 
-      if (error) throw error
+      if (error) {
+        console.error("[v0] Splitter insert error:", error)
+        throw error
+      }
+
+      console.log("[v0] Splitter added successfully")
+      // Refetch locations to update the UI
+      await fetchLocations()
     } catch (error) {
       console.error("[v0] Error adding splitter:", error)
       throw error
@@ -270,6 +344,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         .eq("id", splitterId)
 
       if (error) throw error
+
+      // Refetch locations to update the UI
+      await fetchLocations()
     } catch (error) {
       console.error("[v0] Error updating splitter:", error)
       throw error
@@ -281,6 +358,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.from("splitters").delete().eq("id", splitterId)
 
       if (error) throw error
+
+      // Refetch locations to update the UI
+      await fetchLocations()
     } catch (error) {
       console.error("[v0] Error deleting splitter:", error)
       throw error

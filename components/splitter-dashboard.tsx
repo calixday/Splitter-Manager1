@@ -36,8 +36,9 @@ export function SplitterDashboard() {
     <div className="min-h-screen bg-slate-950 flex flex-col">
       <header className="border-b border-slate-800 bg-slate-900 shadow-sm sticky top-0 z-40">
         <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between py-2.5 sm:py-3 gap-2 sm:gap-3">
-            <div className="flex-1 min-w-0 w-full lg:w-auto">
+          {/* Top row: Title and stats */}
+          <div className="flex items-start justify-between py-2 sm:py-2.5 gap-2">
+            <div className="flex-1 min-w-0">
               <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent line-clamp-1">
                 SPLITTER MGR
               </h1>
@@ -56,8 +57,19 @@ export function SplitterDashboard() {
               </div>
             </div>
             
-            {/* Search Bar on the Right */}
-            <div className="w-full lg:w-80 lg:ml-4">
+            <button
+              onClick={() => setShowAddModal(true)}
+              disabled={isLoading}
+              className="text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-lg transition-colors disabled:opacity-50 touch-manipulation font-medium flex-shrink-0 h-fit"
+            >
+              <span className="hidden sm:inline">+ Add Location</span>
+              <span className="sm:hidden">+ Add</span>
+            </button>
+          </div>
+          
+          {/* Bottom row: Search Bar */}
+          <div className="pb-2 sm:pb-2.5">
+            <div className="max-w-sm ml-auto">
               <SearchBar
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
@@ -65,15 +77,6 @@ export function SplitterDashboard() {
                 setSearchType={setSearchType}
               />
             </div>
-            
-            <button
-              onClick={() => setShowAddModal(true)}
-              disabled={isLoading}
-              className="text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-lg transition-colors disabled:opacity-50 touch-manipulation font-medium flex-shrink-0"
-            >
-              <span className="hidden sm:inline">+ Add Location</span>
-              <span className="sm:hidden">+ Add</span>
-            </button>
           </div>
         </div>
       </header>
