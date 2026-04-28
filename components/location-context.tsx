@@ -208,15 +208,23 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const addLocation = async (location: Location) => {
     try {
       const locationId = generateUUID()
+      console.log("[v0] Adding location:", { locationId, name: location.name, splitterCount: location.splitters.length })
+      
       const { error: locError } = await supabase.from("locations").insert({
         id: locationId,
         name: location.name,
-        technician_id: location.technician_id || null,
+        // Note: technician_id column may not exist in older databases
+        // Technician is determined from splitters instead
       })
 
-      if (locError) throw locError
+      if (locError) {
+        console.error("[v0] Location insert error:", locError)
+        throw locError
+      }
+      console.log("[v0] Location inserted successfully")
 
       if (location.splitters.length > 0) {
+        console.log("[v0] Inserting splitters with technician assignment...")
         const { error: splitterError } = await supabase.from("splitters").insert(
           location.splitters.map((s) => ({
             id: generateUUID(),
@@ -224,33 +232,48 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
             model: s.model,
             port: s.port,
             notes: s.notes || "",
+            technician: "ngaira", // Default new locations to ngaira
           })),
         )
 
-        if (splitterError) throw splitterError
+        if (splitterError) {
+          console.error("[v0] Splitter insert error:", splitterError)
+          throw splitterError
+        }
+        console.log("[v0] Splitters inserted successfully")
       }
 
       // Refetch locations to update the UI
+      console.log("[v0] Refetching locations...")
       await fetchLocations()
+      console.log("[v0] Location added successfully!")
     } catch (error) {
-      console.error("Error adding location:", error)
+      console.error("[v0] Error adding location:", error)
       throw error
     }
   }
 
   const updateLocation = async (id: string, updatedLocation: Location) => {
     try {
+      console.log("[v0] Updating location:", { id, name: updatedLocation.name })
+      
       const { error } = await supabase
         .from("locations")
         .update({ 
           name: updatedLocation.name,
-          technician_id: updatedLocation.technician_id || null,
+          // Note: technician_id column may not exist in older databases
+          // Technician is determined from splitters instead
         })
         .eq("id", id)
 
-      if (error) throw error
+      if (error) {
+        console.error("[v0] Location update error:", error)
+        throw error
+      }
+      console.log("[v0] Location updated successfully")
 
       // Refetch locations to update the UI
+      console.log("[v0] Refetching locations...")
       await fetchLocations()
     } catch (error) {
       console.error("[v0] Error updating location:", error)
@@ -274,20 +297,31 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
   const addSplitterToLocation = async (locationId: string, splitter: Splitter) => {
     try {
+      // Find the location to get its current technician
+      const location = locations.find(l => l.id === locationId)
+      const technicianName = location?.technician?.name || "ngaira"
+      
+      console.log("[v0] Adding splitter to location:", locationId, "with technician:", technicianName)
+      
       const { error } = await supabase.from("splitters").insert({
         id: generateUUID(),
         location_id: locationId,
         model: splitter.model,
         port: splitter.port,
         notes: splitter.notes || "",
+        technician: technicianName, // Preserve the technician assignment
       })
 
-      if (error) throw error
+      if (error) {
+        console.error("[v0] Splitter insert error:", error)
+        throw error
+      }
 
+      console.log("[v0] Splitter added successfully")
       // Refetch locations to update the UI
       await fetchLocations()
     } catch (error) {
-      console.error("Error adding splitter:", error)
+      console.error("[v0] Error adding splitter:", error)
       throw error
     }
   }
