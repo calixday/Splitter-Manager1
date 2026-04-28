@@ -207,8 +207,11 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
         if (splitterError) throw splitterError
       }
+
+      // Refetch locations to update the UI
+      await fetchLocations()
     } catch (error) {
-      console.error("[v0] Error adding location:", error)
+      console.error("Error adding location:", error)
       throw error
     }
   }
@@ -224,6 +227,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         .eq("id", id)
 
       if (error) throw error
+
+      // Refetch locations to update the UI
+      await fetchLocations()
     } catch (error) {
       console.error("[v0] Error updating location:", error)
       throw error
@@ -235,6 +241,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.from("locations").delete().eq("id", id)
 
       if (error) throw error
+
+      // Refetch locations to update the UI
+      await fetchLocations()
     } catch (error) {
       console.error("[v0] Error deleting location:", error)
       throw error
@@ -252,8 +261,11 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (error) throw error
+
+      // Refetch locations to update the UI
+      await fetchLocations()
     } catch (error) {
-      console.error("[v0] Error adding splitter:", error)
+      console.error("Error adding splitter:", error)
       throw error
     }
   }
@@ -270,6 +282,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         .eq("id", splitterId)
 
       if (error) throw error
+
+      // Refetch locations to update the UI
+      await fetchLocations()
     } catch (error) {
       console.error("[v0] Error updating splitter:", error)
       throw error
@@ -281,6 +296,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.from("splitters").delete().eq("id", splitterId)
 
       if (error) throw error
+
+      // Refetch locations to update the UI
+      await fetchLocations()
     } catch (error) {
       console.error("[v0] Error deleting splitter:", error)
       throw error
