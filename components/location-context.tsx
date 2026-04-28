@@ -225,6 +225,12 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
       if (location.splitters.length > 0) {
         console.log("[v0] Inserting splitters with technician assignment...")
+        
+        // Get the selected technician name from the technician_id
+        const selectedTechnician = technicians.find((t) => t.id === location.technician_id)
+        const technicianName = selectedTechnician?.name || "ngaira"
+        console.log("[v0] Using technician:", technicianName)
+        
         const { error: splitterError } = await supabase.from("splitters").insert(
           location.splitters.map((s) => ({
             id: generateUUID(),
@@ -232,7 +238,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
             model: s.model,
             port: s.port,
             notes: s.notes || "",
-            technician: "ngaira", // Default new locations to ngaira
+            technician: technicianName, // Use selected technician
           })),
         )
 
@@ -240,7 +246,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           console.error("[v0] Splitter insert error:", splitterError)
           throw splitterError
         }
-        console.log("[v0] Splitters inserted successfully")
+        console.log("[v0] Splitters inserted successfully with technician:", technicianName)
       }
 
       // Refetch locations to update the UI
