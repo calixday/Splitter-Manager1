@@ -15,7 +15,7 @@ interface SearchBarProps {
 }
 
 const TECHNICIANS = ["ngaira", "kioko", "tum"]
-const SAMPLE_SPLITTER_MODELS = ["ADHS C550 1", "ADHS C650 2", "JT C650", "KAREN C650", "KAREN C620", "RUBIA C650"]
+const SAMPLE_SPLITTER_MODELS = ["ADHS C650 1", "ADHS C650 2", "JT C650", "KAREN C650", "KAREN C620", "RUBIA C650"]
 
 export function SearchBar({ 
   searchQuery, 
