@@ -10,13 +10,24 @@ interface SearchBarProps {
   setSearchQuery: (query: string) => void
   searchType: "location" | "splitter" | "technician"
   setSearchType: (type: "location" | "splitter" | "technician") => void
+  selectedModel?: string
+  setSelectedModel?: (model: string) => void
 }
 
 const TECHNICIANS = ["ngaira", "kioko", "tum"]
 const SAMPLE_SPLITTER_MODELS = ["ADHS C650 1", "ADHS 650 2", "JT C650", "KAREN C650/C620"]
 
-export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchType }: SearchBarProps) {
-  const [selectedModel, setSelectedModel] = useState("")
+export function SearchBar({ 
+  searchQuery, 
+  setSearchQuery, 
+  searchType, 
+  setSearchType,
+  selectedModel: externalSelectedModel,
+  setSelectedModel: externalSetSelectedModel
+}: SearchBarProps) {
+  const [internalSelectedModel, setInternalSelectedModel] = useState("")
+  const selectedModel = externalSelectedModel ?? internalSelectedModel
+  const setSelectedModel = externalSetSelectedModel ?? setInternalSelectedModel
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newValue = e.target.value
@@ -48,7 +59,8 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
     if (searchType === "location") return "Search location..."
     if (searchType === "technician") return "Select technician..."
     if (searchType === "splitter" && selectedModel) return `Search ${selectedModel} port (e.g., 7/9)...`
-    return "Select a splitter model first..."
+    if (searchType === "splitter") return "Search port (e.g., 7/9) or model..."
+    return "Search..."
   }
 
   return (
@@ -134,7 +146,7 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
             ▼
           </div>
         </div>
-      ) : searchType === "splitter" && selectedModel ? (
+      ) : searchType === "splitter" ? (
         <div className="relative flex items-center w-full">
           <Input
             placeholder={getPlaceholder()}
