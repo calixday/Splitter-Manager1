@@ -3,7 +3,7 @@
 import type React from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 
 interface SearchBarProps {
   searchQuery: string
@@ -15,7 +15,7 @@ interface SearchBarProps {
 }
 
 const TECHNICIANS = ["ngaira", "kioko", "tum"]
-const SAMPLE_SPLITTER_MODELS = ["ADHS C650 1", "ADHS 650 2", "JT C650", "KAREN C650/C620"]
+const SAMPLE_SPLITTER_MODELS = ["ADHS C550 1", "ADHS C650 2", "JT C650", "KAREN C650", "KAREN C620", "RUBIA C650"]
 
 export function SearchBar({ 
   searchQuery, 
@@ -28,6 +28,8 @@ export function SearchBar({
   const [internalSelectedModel, setInternalSelectedModel] = useState("")
   const selectedModel = externalSelectedModel ?? internalSelectedModel
   const setSelectedModel = externalSetSelectedModel ?? setInternalSelectedModel
+  const portInputRef = useRef<HTMLInputElement>(null)
+  const splitterInputRef = useRef<HTMLInputElement>(null)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newValue = e.target.value
@@ -48,8 +50,19 @@ export function SearchBar({
     } else {
       setSelectedModel(model)
       setSearchQuery("")
+      // Focus the port input after selecting a model
+      setTimeout(() => {
+        portInputRef.current?.focus()
+      }, 0)
     }
   }
+
+  // Auto-focus the splitter search input on component mount
+  useEffect(() => {
+    if (searchType === "splitter" && !selectedModel) {
+      splitterInputRef.current?.focus()
+    }
+  }, [searchType, selectedModel])
 
   const handleTechnicianSelect = (tech: string) => {
     setSearchQuery(tech)
@@ -149,11 +162,13 @@ export function SearchBar({
       ) : searchType === "splitter" ? (
         <div className="relative flex items-center w-full">
           <Input
+            ref={selectedModel ? portInputRef : splitterInputRef}
             placeholder={getPlaceholder()}
             value={searchQuery}
             onChange={handleSearchChange}
+            inputMode={selectedModel ? "numeric" : "text"}
             className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-8 min-h-10 sm:min-h-11"
-            autoFocus
+            autoFocus={!selectedModel}
           />
           {searchQuery && (
             <button
