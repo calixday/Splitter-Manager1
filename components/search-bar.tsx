@@ -3,21 +3,38 @@
 import type React from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { useState, useRef, useEffect } from "react"
 
 interface SearchBarProps {
   searchQuery: string
   setSearchQuery: (query: string) => void
   searchType: "location" | "splitter" | "technician"
   setSearchType: (type: "location" | "splitter" | "technician") => void
+  selectedModel?: string
+  setSelectedModel?: (model: string) => void
 }
 
 const TECHNICIANS = ["ngaira", "kioko", "tum"]
+const SAMPLE_SPLITTER_MODELS = ["ADHS C650 1", "ADHS C650 2", "JT C650", "KAREN C650", "KAREN C620", "RUBIA C650"]
 
-export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchType }: SearchBarProps) {
+export function SearchBar({ 
+  searchQuery, 
+  setSearchQuery, 
+  searchType, 
+  setSearchType,
+  selectedModel: externalSelectedModel,
+  setSelectedModel: externalSetSelectedModel
+}: SearchBarProps) {
+  const [internalSelectedModel, setInternalSelectedModel] = useState("")
+  const selectedModel = externalSelectedModel ?? internalSelectedModel
+  const setSelectedModel = externalSetSelectedModel ?? setInternalSelectedModel
+  const portInputRef = useRef<HTMLInputElement>(null)
+  const splitterInputRef = useRef<HTMLInputElement>(null)
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newValue = e.target.value
 
-    if (searchType === "splitter" && newValue.length > 0) {
+    if (searchType === "splitter" && selectedModel && newValue.length > 0) {
       if (newValue.length === 1 && /^\d$/.test(newValue)) {
         newValue = newValue + "/"
       }
@@ -26,6 +43,27 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
     setSearchQuery(newValue)
   }
 
+  const handleModelClick = (model: string) => {
+    if (selectedModel === model) {
+      setSelectedModel("")
+      setSearchQuery("")
+    } else {
+      setSelectedModel(model)
+      setSearchQuery("")
+      // Focus the port input after selecting a model
+      setTimeout(() => {
+        portInputRef.current?.focus()
+      }, 0)
+    }
+  }
+
+  // Auto-focus the splitter search input on component mount
+  useEffect(() => {
+    if (searchType === "splitter" && !selectedModel) {
+      splitterInputRef.current?.focus()
+    }
+  }, [searchType, selectedModel])
+
   const handleTechnicianSelect = (tech: string) => {
     setSearchQuery(tech)
   }
@@ -33,7 +71,9 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
   const getPlaceholder = () => {
     if (searchType === "location") return "Search location..."
     if (searchType === "technician") return "Select technician..."
-    return "Search splitter (e.g., 7/9)..."
+    if (searchType === "splitter" && selectedModel) return `Search ${selectedModel} port (e.g., 7/9)...`
+    if (searchType === "splitter") return "Search port (e.g., 7/9) or model..."
+    return "Search..."
   }
 
   return (
@@ -45,6 +85,7 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
           onClick={() => {
             setSearchType("splitter")
             setSearchQuery("")
+            setSelectedModel("")
           }}
           size="sm"
           className="text-xs sm:text-xs flex-1 py-1.5 h-auto font-medium"
@@ -57,6 +98,7 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
           onClick={() => {
             setSearchType("location")
             setSearchQuery("")
+            setSelectedModel("")
           }}
           size="sm"
           className="text-xs sm:text-xs flex-1 py-1.5 h-auto font-medium"
@@ -69,6 +111,7 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
           onClick={() => {
             setSearchType("technician")
             setSearchQuery("")
+            setSelectedModel("")
           }}
           size="sm"
           className="text-xs sm:text-xs flex-1 py-1.5 h-auto font-medium"
@@ -78,7 +121,26 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
         </Button>
       </div>
 
-      {/* Search Input - Technician Dropdown or Regular Input */}
+      {/* Sample Splitter Models - Only show when Splitter tab is active */}
+      {searchType === "splitter" && (
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {SAMPLE_SPLITTER_MODELS.map((model) => (
+            <button
+              key={model}
+              onClick={() => handleModelClick(model)}
+              className={`px-3 py-2 text-xs rounded-lg font-medium transition-all whitespace-nowrap flex-shrink-0 ${
+                selectedModel === model
+                  ? "bg-blue-600 text-white"
+                  : "bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white border border-slate-600"
+              }`}
+            >
+              {model}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Search Input */}
       {searchType === "technician" ? (
         <div className="relative w-full">
           <select
@@ -97,7 +159,29 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
             ▼
           </div>
         </div>
-      ) : (
+      ) : searchType === "splitter" ? (
+        <div className="relative flex items-center w-full">
+          <Input
+            ref={selectedModel ? portInputRef : splitterInputRef}
+            placeholder={getPlaceholder()}
+            value={searchQuery}
+            onChange={handleSearchChange}
+            inputMode={selectedModel ? "numeric" : "text"}
+            className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-8 min-h-10 sm:min-h-11"
+            autoFocus={!selectedModel}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 text-slate-400 hover:text-red-400 transition-colors active:scale-90"
+              title="Clear"
+              type="button"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      ) : searchType === "location" ? (
         <div className="relative flex items-center w-full">
           <Input
             placeholder={getPlaceholder()}
@@ -117,7 +201,7 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
             </button>
           )}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

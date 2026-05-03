@@ -10,6 +10,7 @@ export function SplitterDashboard() {
   const { locations, isLoading } = useLocations()
   const [searchQuery, setSearchQuery] = useState("")
   const [searchType, setSearchType] = useState<"location" | "splitter" | "technician">("splitter")
+  const [selectedModel, setSelectedModel] = useState("")
   const [showAddModal, setShowAddModal] = useState(false)
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null)
 
@@ -22,11 +23,24 @@ export function SplitterDashboard() {
     } else if (searchType === "technician") {
       return location.technician?.name.toLowerCase().includes(searchQuery.toLowerCase())
     } else {
-      return location.splitters.some(
-        (splitter) =>
-          splitter.model.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          splitter.port.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
+      // Splitter search
+      return location.splitters.some((splitter) => {
+        // If a model is selected, filter by that model first
+        if (selectedModel && splitter.model.toLowerCase() !== selectedModel.toLowerCase()) {
+          return false
+        }
+        
+        // Then check if search query matches
+        if (searchQuery) {
+          return (
+            splitter.model.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            splitter.port.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        }
+        
+        // If no search query, return true if model filter passed
+        return true
+      })
     }
   })
 
@@ -75,6 +89,8 @@ export function SplitterDashboard() {
                 setSearchQuery={setSearchQuery}
                 searchType={searchType}
                 setSearchType={setSearchType}
+                selectedModel={selectedModel}
+                setSelectedModel={setSelectedModel}
               />
             </div>
           </div>
