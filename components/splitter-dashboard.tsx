@@ -30,6 +30,14 @@ export function SplitterDashboard() {
     }
   })
 
+  // Calculate technician-specific statistics
+  const technicianStats = searchType === "technician" && searchQuery 
+    ? {
+        locations: filteredLocations.length,
+        splitters: filteredLocations.reduce((sum, location) => sum + location.splitters.length, 0)
+      }
+    : null
+
 
 
   return (
@@ -84,10 +92,30 @@ export function SplitterDashboard() {
       <main className="flex-1 mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8 py-3 sm:py-6">
         {/* Search Results Header */}
         {searchQuery && (
-          <div className="flex items-center justify-between mb-3 p-2 sm:p-3 bg-slate-800/50 rounded-lg border border-red-500/30">
-            <p className="text-xs sm:text-sm text-slate-200">
-              <span className="text-red-400">●</span> Searching: <span className="font-semibold text-red-400">"{searchQuery}"</span> in <span className="capitalize">{searchType}</span>
-            </p>
+          <div className="flex flex-col gap-2 mb-4">
+            <div className="flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 rounded-lg border border-blue-500/30">
+              <div className="flex flex-col gap-1">
+                <p className="text-xs sm:text-sm text-slate-200">
+                  <span className="text-blue-400">●</span> Searching: <span className="font-semibold text-blue-300">"{searchQuery}"</span> in <span className="capitalize font-medium">{searchType}</span>
+                </p>
+                {technicianStats && (
+                  <div className="flex items-center gap-3 mt-1 text-xs sm:text-sm">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-200 border border-blue-500/30">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.5 1.5H5.75A2.25 2.25 0 003.5 3.75v12.5A2.25 2.25 0 005.75 18.5h8.5a2.25 2.25 0 002.25-2.25V8.75"/>
+                      </svg>
+                      <span className="font-semibold">{technicianStats.locations} location{technicianStats.locations !== 1 ? 's' : ''}</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-200 border border-cyan-500/30">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"/>
+                      </svg>
+                      <span className="font-semibold">{technicianStats.splitters} splitter{technicianStats.splitters !== 1 ? 's' : ''}</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

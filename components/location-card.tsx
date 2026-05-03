@@ -105,30 +105,36 @@ export function LocationCard({ location, highlightQuery = "", highlightType = "s
   }
 
   const gradientColors = [
-    "from-blue-600 to-cyan-500",
-    "from-purple-600 to-pink-500",
-    "from-emerald-600 to-teal-500",
-    "from-orange-600 to-yellow-500",
-    "from-rose-600 to-red-500",
-    "from-indigo-600 to-blue-500",
-    "from-green-600 to-emerald-500",
-    "from-sky-600 to-cyan-500",
+    { bg: "from-blue-600 to-cyan-500", accent: "from-blue-500/20 to-cyan-500/20" },
+    { bg: "from-purple-600 to-pink-500", accent: "from-purple-500/20 to-pink-500/20" },
+    { bg: "from-emerald-600 to-teal-500", accent: "from-emerald-500/20 to-teal-500/20" },
+    { bg: "from-orange-600 to-yellow-500", accent: "from-orange-500/20 to-yellow-500/20" },
+    { bg: "from-rose-600 to-red-500", accent: "from-rose-500/20 to-red-500/20" },
+    { bg: "from-indigo-600 to-blue-500", accent: "from-indigo-500/20 to-blue-500/20" },
+    { bg: "from-green-600 to-emerald-500", accent: "from-green-500/20 to-emerald-500/20" },
+    { bg: "from-sky-600 to-cyan-500", accent: "from-sky-500/20 to-cyan-500/20" },
   ]
 
   const colorIndex = location.name.charCodeAt(0) % gradientColors.length
-  const gradientClass = gradientColors[colorIndex]
+  const { bg: gradientClass, accent: accentGradient } = gradientColors[colorIndex]
 
   return (
     <>
-      <div className={`rounded-lg bg-slate-800 shadow-sm hover:shadow-lg transition-all overflow-hidden flex flex-col h-full ${
+      <div className={`rounded-xl bg-gradient-to-b from-slate-800 to-slate-900 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all overflow-hidden flex flex-col h-full ${
         shouldHighlight 
-          ? "border-2 border-red-500 shadow-red-500/30" 
+          ? "border-2 border-red-500 shadow-red-500/50 ring-2 ring-red-500/20" 
           : "border border-slate-700"
       }`}>
+        {/* Header with Gradient */}
         <div
-          className={`border-b border-slate-700 bg-gradient-to-r ${gradientClass} p-2.5 sm:p-3 flex items-start justify-between gap-2 sm:gap-3`}
+          className={`relative border-b border-slate-700 bg-gradient-to-r ${gradientClass} p-3 sm:p-4 flex items-start justify-between gap-3 overflow-hidden`}
         >
-          <div className="flex-1 min-w-0">
+          {/* Decorative background shapes */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-0 right-0 w-20 h-20 rounded-full blur-2xl opacity-40 bg-white"></div>
+          </div>
+          
+          <div className="flex-1 min-w-0 relative z-10">
             {editingLocation ? (
               <input
                 type="text"
@@ -139,67 +145,100 @@ export function LocationCard({ location, highlightQuery = "", highlightType = "s
                   if (e.key === "Enter") handleEditLocation()
                   if (e.key === "Escape") setEditingLocation(false)
                 }}
-                className="w-full font-bold text-white text-xs sm:text-sm bg-slate-700 border border-slate-600 rounded px-2 py-1"
+                className="w-full font-bold text-white text-sm sm:text-base bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-1.5"
                 autoFocus
               />
             ) : (
-              <h3 className="font-bold text-white text-xs sm:text-sm break-words line-clamp-2">{location.name}</h3>
-            )}
-            <p className="text-xs text-slate-100 mt-0.5">{location.splitters.length} splitter(s)</p>
-            {location.technician && (
-              <p className={`text-xs mt-0.5 font-medium ${isTechnicianMatching ? "text-red-300 bg-red-500/20 px-1.5 py-0.5 rounded" : "text-yellow-200"}`}>
-                {location.technician.name}
-              </p>
+              <div>
+                <h3 className="font-bold text-white text-sm sm:text-base break-words line-clamp-2">{location.name}</h3>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-medium text-white">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10.5 1.5H5.75A2.25 2.25 0 003.5 3.75v12.5A2.25 2.25 0 005.75 18.5h8.5a2.25 2.25 0 002.25-2.25V8.75m-9-3v3m3-3v3m-8 0h10" stroke="white" strokeWidth="0.5" fill="none"/>
+                    </svg>
+                    {location.splitters.length}
+                  </span>
+                  {location.technician && (
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                      isTechnicianMatching 
+                        ? "bg-red-500/40 text-red-100 ring-1 ring-red-400/50" 
+                        : "bg-white/20 text-white"
+                    }`}>
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
+                      </svg>
+                      {location.technician.name.charAt(0).toUpperCase() + location.technician.name.slice(1)}
+                    </span>
+                  )}
+                </div>
+              </div>
             )}
           </div>
           <button
             onClick={() => setShowLocationDetails(true)}
-            className="text-white hover:text-slate-200 transition-colors flex-shrink-0 pt-0.5"
+            className="text-white hover:text-slate-100 transition-colors flex-shrink-0 relative z-10 hover:bg-white/20 rounded-lg p-1.5"
             title="Settings"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
               <circle cx="12" cy="12" r="3"/>
             </svg>
           </button>
         </div>
 
-        <div className="p-2 space-y-1.5 flex-1 overflow-y-auto max-h-56">
+        {/* Content Area */}
+        <div className={`p-3 sm:p-4 space-y-2 flex-1 overflow-y-auto max-h-56 bg-gradient-to-b ${accentGradient}`}>
           {location.splitters.length > 0 ? (
             location.splitters.map((splitter) => {
               const isSplitterMatching = matchingSplitters.some((s) => s.id === splitter.id)
               return (
                 <div
                   key={splitter.id}
-                  className={`rounded p-1.5 transition-colors ${
+                  className={`rounded-lg p-2.5 transition-all backdrop-blur-sm ${
                     isSplitterMatching
-                      ? "border border-red-500 bg-red-500/10"
-                      : "border border-slate-700 bg-slate-700/50"
+                      ? "border border-red-500/50 bg-red-500/15 ring-1 ring-red-500/30 shadow-md shadow-red-500/20"
+                      : "border border-slate-600/50 bg-slate-700/40 hover:bg-slate-700/60"
                   }`}
                 >
-                  <p className={`text-xs font-semibold break-words ${
-                    isSplitterMatching ? "text-red-200" : "text-slate-100"
-                  }`}>
-                    {splitter.model}
-                  </p>
-                  <p className={`text-xs ${
-                    isSplitterMatching ? "text-red-300" : "text-slate-400"
-                  }`}>
-                    {splitter.port}
-                  </p>
-                  {splitter.notes && <p className={`text-xs line-clamp-1 ${
-                    isSplitterMatching ? "text-red-300" : "text-slate-400"
-                  }`}>{splitter.notes}</p>}
-                  {isSplitterMatching && location.technician && (
-                    <p className="text-xs mt-1 font-bold text-yellow-300 bg-yellow-500/20 px-1.5 py-0.5 rounded inline-block">
-                      {location.technician.name}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <p className={`text-xs font-bold break-words mb-1 ${
+                        isSplitterMatching ? "text-red-200" : "text-slate-50"
+                      }`}>
+                        {splitter.model}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <svg className="w-3 h-3 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10.5 1.5h-1m0 0H5.75A2.25 2.25 0 003.5 3.75v12.5A2.25 2.25 0 005.75 18.5h8.5a2.25 2.25 0 002.25-2.25V8.75m-9-3v3" stroke="currentColor" strokeWidth="1" fill="none"/>
+                        </svg>
+                        <p className={`text-xs font-semibold ${
+                          isSplitterMatching ? "text-red-300" : "text-slate-300"
+                        }`}>
+                          {splitter.port}
+                        </p>
+                      </div>
+                    </div>
+                    {isSplitterMatching && (
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                    )}
+                  </div>
+                  {splitter.notes && (
+                    <p className={`text-xs line-clamp-1 mt-1.5 pl-5 border-l-2 ${
+                      isSplitterMatching ? "border-red-400/40 text-red-300/70" : "border-slate-600/40 text-slate-400"
+                    }`}>
+                      {splitter.notes}
                     </p>
                   )}
                 </div>
               )
             })
           ) : (
-            <p className="text-xs text-slate-400 text-center py-2">No splitters</p>
+            <div className="text-center py-8">
+              <svg className="w-10 h-10 mx-auto text-slate-600/50 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10m0-10l8-4"/>
+              </svg>
+              <p className="text-xs text-slate-400 font-medium">No splitters yet</p>
+            </div>
           )}
         </div>
 
