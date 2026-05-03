@@ -3,8 +3,6 @@
 import type React from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useState, useMemo } from "react"
-import { useLocations } from "./location-context"
 
 interface SearchBarProps {
   searchQuery: string
@@ -14,26 +12,13 @@ interface SearchBarProps {
 }
 
 const TECHNICIANS = ["ngaira", "kioko", "tum"]
+const SAMPLE_SPLITTER_MODELS = ["ADHS C650 1", "ADHS 650 2", "JT C650", "KAREN C650/C620"]
 
 export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchType }: SearchBarProps) {
-  const { locations } = useLocations()
-  const [selectedModel, setSelectedModel] = useState("")
-
-  // Extract all unique splitter models from locations
-  const splitterModels = useMemo(() => {
-    const models = new Set<string>()
-    locations.forEach((location) => {
-      location.splitters.forEach((splitter) => {
-        models.add(splitter.model)
-      })
-    })
-    return Array.from(models).sort()
-  }, [locations])
-
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newValue = e.target.value
 
-    if (searchType === "splitter" && selectedModel && newValue.length > 0) {
+    if (searchType === "splitter" && newValue.length > 0) {
       if (newValue.length === 1 && /^\d$/.test(newValue)) {
         newValue = newValue + "/"
       }
@@ -42,10 +27,8 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
     setSearchQuery(newValue)
   }
 
-  const handleModelSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const model = e.target.value
-    setSelectedModel(model)
-    setSearchQuery("") // Reset port search when model changes
+  const handleModelClick = (model: string) => {
+    setSearchQuery(model)
   }
 
   const handleTechnicianSelect = (tech: string) => {
@@ -55,8 +38,7 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
   const getPlaceholder = () => {
     if (searchType === "location") return "Search location..."
     if (searchType === "technician") return "Select technician..."
-    if (searchType === "splitter" && selectedModel) return `Search ${selectedModel} port (e.g., 7/9)...`
-    return "Select a splitter model first..."
+    return "Search splitter (e.g., 7/9)..."
   }
 
   return (
@@ -68,7 +50,6 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
           onClick={() => {
             setSearchType("splitter")
             setSearchQuery("")
-            setSelectedModel("")
           }}
           size="sm"
           className="text-xs sm:text-xs flex-1 py-1.5 h-auto font-medium"
@@ -81,7 +62,6 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
           onClick={() => {
             setSearchType("location")
             setSearchQuery("")
-            setSelectedModel("")
           }}
           size="sm"
           className="text-xs sm:text-xs flex-1 py-1.5 h-auto font-medium"
@@ -94,7 +74,6 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
           onClick={() => {
             setSearchType("technician")
             setSearchQuery("")
-            setSelectedModel("")
           }}
           size="sm"
           className="text-xs sm:text-xs flex-1 py-1.5 h-auto font-medium"
@@ -104,52 +83,27 @@ export function SearchBar({ searchQuery, setSearchQuery, searchType, setSearchTy
         </Button>
       </div>
 
-      {/* Splitter Search: Two-Step Selection */}
-      {searchType === "splitter" ? (
-        <div className="space-y-2">
-          {/* Step 1: Select Splitter Model */}
-          <div className="relative w-full">
-            <select
-              value={selectedModel}
-              onChange={handleModelSelect}
-              className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-10 sm:min-h-11 appearance-none cursor-pointer font-medium"
+      {/* Sample Splitter Models - Only show when Splitter tab is active */}
+      {searchType === "splitter" && (
+        <div className="flex flex-wrap gap-1.5">
+          {SAMPLE_SPLITTER_MODELS.map((model) => (
+            <button
+              key={model}
+              onClick={() => handleModelClick(model)}
+              className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all ${
+                searchQuery === model
+                  ? "bg-blue-600 text-white ring-2 ring-blue-400 ring-offset-2 ring-offset-slate-950"
+                  : "bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white border border-slate-600"
+              }`}
             >
-              <option value="">Select splitter model...</option>
-              {splitterModels.map((model) => (
-                <option key={model} value={model} className="bg-slate-700 text-white">
-                  {model}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-              ▼
-            </div>
-          </div>
-
-          {/* Step 2: Search by Port (only if model is selected) */}
-          {selectedModel && (
-            <div className="relative flex items-center w-full">
-              <Input
-                placeholder={getPlaceholder()}
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-8 min-h-10 sm:min-h-11"
-                autoFocus
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2 text-slate-400 hover:text-red-400 transition-colors active:scale-90"
-                  title="Clear"
-                  type="button"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          )}
+              {model}
+            </button>
+          ))}
         </div>
-      ) : searchType === "technician" ? (
+      )}
+
+      {/* Search Input */}
+      {searchType === "technician" ? (
         <div className="relative w-full">
           <select
             value={searchQuery}
