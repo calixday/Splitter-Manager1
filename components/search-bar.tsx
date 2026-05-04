@@ -29,15 +29,37 @@ export function SearchBar({
   const selectedModel = externalSelectedModel ?? internalSelectedModel
   const setSelectedModel = externalSetSelectedModel ?? setInternalSelectedModel
   const portInputRef = useRef<HTMLInputElement>(null)
-  const splitterInputRef = useRef<HTMLInputElement>(null)
+  const modelInputRef = useRef<HTMLInputElement>(null)
+  const keyboardTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [showKeyboardHint, setShowKeyboardHint] = useState(false)
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePortChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newValue = e.target.value
 
-    if (searchType === "splitter" && selectedModel && newValue.length > 0) {
-      if (newValue.length === 1 && /^\d$/.test(newValue)) {
-        newValue = newValue + "/"
-      }
+    // Show keyboard hint when user starts typing
+    setShowKeyboardHint(true)
+
+    // Clear existing timeout
+    if (keyboardTimeoutRef.current) {
+      clearTimeout(keyboardTimeoutRef.current)
+    }
+
+    // Set new timeout to hide keyboard after 3 seconds of inactivity
+    keyboardTimeoutRef.current = setTimeout(() => {
+      setShowKeyboardHint(false)
+    }, 3000)
+
+    // Auto-format: add "/" after first digit
+    if (newValue.length === 1 && /^\d$/.test(newValue)) {
+      newValue = newValue + "/"
+    }
+
+    // Only allow digits and forward slash
+    newValue = newValue.replace(/[^0-9/]/g, "")
+
+    // Ensure format is correct (digit/digit)
+    if (newValue.length > 3) {
+      newValue = newValue.slice(0, 3)
     }
 
     setSearchQuery(newValue)
@@ -47,9 +69,11 @@ export function SearchBar({
     if (selectedModel === model) {
       setSelectedModel("")
       setSearchQuery("")
+      setShowKeyboardHint(false)
     } else {
       setSelectedModel(model)
       setSearchQuery("")
+      setShowKeyboardHint(false)
       // Focus the port input after selecting a model
       setTimeout(() => {
         portInputRef.current?.focus()
@@ -57,23 +81,24 @@ export function SearchBar({
     }
   }
 
-  // Auto-focus the splitter search input on component mount
+  // Auto-focus the model buttons on component mount when Splitter is active
   useEffect(() => {
     if (searchType === "splitter" && !selectedModel) {
-      splitterInputRef.current?.focus()
+      modelInputRef.current?.focus()
     }
   }, [searchType, selectedModel])
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (keyboardTimeoutRef.current) {
+        clearTimeout(keyboardTimeoutRef.current)
+      }
+    }
+  }, [])
+
   const handleTechnicianSelect = (tech: string) => {
     setSearchQuery(tech)
-  }
-
-  const getPlaceholder = () => {
-    if (searchType === "location") return "Search location..."
-    if (searchType === "technician") return "Select technician..."
-    if (searchType === "splitter" && selectedModel) return `Search ${selectedModel} port (e.g., 7/9)...`
-    if (searchType === "splitter") return "Search port (e.g., 7/9) or model..."
-    return "Search..."
   }
 
   return (
@@ -123,25 +148,77 @@ export function SearchBar({
 
       {/* Sample Splitter Models - Only show when Splitter tab is active */}
       {searchType === "splitter" && (
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
-          {SAMPLE_SPLITTER_MODELS.map((model) => (
-            <button
-              key={model}
-              onClick={() => handleModelClick(model)}
-              className={`px-3 py-2 text-xs rounded-lg font-medium transition-all whitespace-nowrap flex-shrink-0 ${
-                selectedModel === model
-                  ? "bg-blue-600 text-white"
-                  : "bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white border border-slate-600"
-              }`}
-            >
-              {model}
-            </button>
-          ))}
-        </div>
+        <>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-slate-300">Select Model:</label>
+            <div className="flex gap-1.5 overflow-x-auto pb-1">
+              {SAMPLE_SPLITTER_MODELS.map((model) => (
+                <button
+                  key={model}
+                  onClick={() => handleModelClick(model)}
+                  className={`px-3 py-2 text-xs rounded-lg font-medium transition-all whitespace-nowrap flex-shrink-0 ${
+                    selectedModel === model
+                      ? "bg-blue-600 text-white ring-2 ring-blue-400"
+                      : "bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white border border-slate-600"
+                  }`}
+                >
+                  {model}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Port Search Input - Only show when a model is selected */}
+          {selectedModel && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-slate-300">Enter Port:</label>
+              <div className="relative flex items-center w-full">
+                <Input
+                  ref={portInputRef}
+                  placeholder="e.g., 7/9"
+                  value={searchQuery}
+                  onChange={handlePortChange}
+                  inputMode="numeric"
+                  maxLength={3}
+                  className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-8 min-h-10 sm:min-h-11"
+                  autoFocus
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("")
+                      setShowKeyboardHint(false)
+                    }}
+                    className="absolute right-2 text-slate-400 hover:text-red-400 transition-colors active:scale-90"
+                    title="Clear"
+                    type="button"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              
+              {/* Keyboard Hint */}
+              {showKeyboardHint && (
+                <div className="flex gap-1 flex-wrap text-xs text-slate-400 p-2 bg-slate-800/50 rounded border border-slate-700">
+                  <span className="font-semibold">Keyboard:</span>
+                  <div className="flex gap-1">
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                      <kbd key={num} className="px-1.5 py-0.5 rounded bg-slate-700 text-slate-200 text-xs border border-slate-600">
+                        {num}
+                      </kbd>
+                    ))}
+                  </div>
+                  <span className="text-slate-500 ml-auto">Disappears in 3 sec</span>
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
 
-      {/* Search Input */}
-      {searchType === "technician" ? (
+      {/* Technician and Location Search */}
+      {searchType === "technician" && (
         <div className="relative w-full">
           <select
             value={searchQuery}
@@ -159,34 +236,14 @@ export function SearchBar({
             ▼
           </div>
         </div>
-      ) : searchType === "splitter" ? (
+      )}
+
+      {searchType === "location" && (
         <div className="relative flex items-center w-full">
           <Input
-            ref={selectedModel ? portInputRef : splitterInputRef}
-            placeholder={getPlaceholder()}
+            placeholder="Search location..."
             value={searchQuery}
-            onChange={handleSearchChange}
-            inputMode={selectedModel ? "numeric" : "text"}
-            className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-8 min-h-10 sm:min-h-11"
-            autoFocus={!selectedModel}
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-2 text-slate-400 hover:text-red-400 transition-colors active:scale-90"
-              title="Clear"
-              type="button"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-      ) : searchType === "location" ? (
-        <div className="relative flex items-center w-full">
-          <Input
-            placeholder={getPlaceholder()}
-            value={searchQuery}
-            onChange={handleSearchChange}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-8 min-h-10 sm:min-h-11"
             autoFocus
           />
@@ -201,7 +258,7 @@ export function SearchBar({
             </button>
           )}
         </div>
-      ) : null}
+      )}
     </div>
   )
 }
