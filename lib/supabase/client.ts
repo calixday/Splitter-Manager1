@@ -19,10 +19,12 @@ export function createClient() {
         update: () => ({ eq: () => ({ data: null, error: { message: "Not configured" } }) }),
         delete: () => ({ eq: () => ({ data: null, error: { message: "Not configured" } }) }),
       }),
-      channel: () => ({
-        on: () => ({ subscribe: (cb?: any) => { if (cb) cb("SUBSCRIBED"); return this } }),
-        unsubscribe: () => null,
-      }),
+      channel: () => {
+        const self = { subscribe: (cb?: any) => { if (cb) cb("SUBSCRIBED"); return self }, unsubscribe: () => null };
+        return {
+          on: () => self
+        };
+      },
       storage: {
         from: () => ({
           upload: () => ({ data: null, error: { message: "Not configured" } }),

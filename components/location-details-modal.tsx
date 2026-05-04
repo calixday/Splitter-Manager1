@@ -186,7 +186,7 @@ export function LocationDetailsModal({ open, onOpenChange, location }: LocationD
                 </div>
               </div>
 
-              {location.notes && (
+              {location.notes !== undefined && location.notes !== null && location.notes !== "" && (
                 <div>
                   <h3 className="font-semibold text-slate-200 mb-2 text-base sm:text-xl">Notes</h3>
                   <p className="text-slate-400 text-xs sm:text-sm bg-slate-700 rounded p-3 sm:p-4">{location.notes}</p>

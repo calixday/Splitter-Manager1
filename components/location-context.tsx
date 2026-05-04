@@ -25,6 +25,7 @@ export interface Location {
   splitters: Splitter[]
   technician_id?: string
   technician?: Technician
+  notes?: string
 }
 
 interface LocationContextType {
@@ -179,7 +180,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         // Re-fetch locations when data changes
         fetchLocations()
       })
-      .subscribe((status) => {
+      .subscribe((status: string) => {
         if (status === "SUBSCRIBED") setIsConnected(true)
       })
 
