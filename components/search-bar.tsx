@@ -30,9 +30,15 @@ export function SearchBar({
   const setSelectedModel = externalSetSelectedModel ?? setInternalSelectedModel
   const portInputRef = useRef<HTMLInputElement>(null)
   const modelInputRef = useRef<HTMLInputElement>(null)
+  const keyboardTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const handlePortChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newValue = e.target.value
+
+    // Clear existing timeout
+    if (keyboardTimeoutRef.current) {
+      clearTimeout(keyboardTimeoutRef.current)
+    }
 
     // Auto-format: add "/" after first digit
     if (newValue.length === 1 && /^\d$/.test(newValue)) {
@@ -48,6 +54,13 @@ export function SearchBar({
     }
 
     setSearchQuery(newValue)
+
+    // Auto-hide keyboard after 3 seconds of inactivity
+    keyboardTimeoutRef.current = setTimeout(() => {
+      if (portInputRef.current) {
+        portInputRef.current.blur()
+      }
+    }, 3000)
   }
 
   const handleModelClick = (model: string) => {
@@ -70,6 +83,15 @@ export function SearchBar({
       modelInputRef.current?.focus()
     }
   }, [searchType, selectedModel])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (keyboardTimeoutRef.current) {
+        clearTimeout(keyboardTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const handleTechnicianSelect = (tech: string) => {
     setSearchQuery(tech)

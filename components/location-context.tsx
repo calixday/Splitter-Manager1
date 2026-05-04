@@ -132,7 +132,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
             technician: assignedTechnician,
             splitters: locationSplitters.map((s: any) => ({
               id: s.id,
-              model: s.model,
+              model: s.model?.toUpperCase() || "",
               port: s.port,
               notes: s.notes || "",
               location_id: s.location_id,
@@ -256,7 +256,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           location.splitters.map((s) => ({
             id: generateUUID(),
             location_id: locationId,
-            model: s.model,
+            model: s.model?.toUpperCase() || "",
             port: s.port,
             notes: s.notes || "",
             technician: technicianName, // Use selected technician
@@ -333,7 +333,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.from("splitters").insert({
         id: generateUUID(),
         location_id: locationId,
-        model: splitter.model,
+        model: splitter.model?.toUpperCase() || "",
         port: splitter.port,
         notes: splitter.notes || "",
         technician: technicianName, // Preserve the technician assignment
@@ -358,7 +358,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase
         .from("splitters")
         .update({
-          model: updatedSplitter.model,
+          model: updatedSplitter.model?.toUpperCase() || "",
           port: updatedSplitter.port,
           notes: updatedSplitter.notes || "",
         })
