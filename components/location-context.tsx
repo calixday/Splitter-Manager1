@@ -62,9 +62,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       
       // Always use fallback technicians (Supabase not required)
       const fallbackTechnicians = [
-        { id: "1", name: "ngaira" },
-        { id: "2", name: "kioko" },
-        { id: "3", name: "tum" },
+        { id: "1", name: "NGAIRA" },
+        { id: "2", name: "KIOKO" },
+        { id: "3", name: "TUM" },
       ]
       
       if (techError) {
@@ -99,9 +99,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
         // Get current technicians list (either from database or fallback)
         const currentTechnicians = techniciansData || [
-          { id: "1", name: "ngaira" },
-          { id: "2", name: "kioko" },
-          { id: "3", name: "tum" },
+          { id: "1", name: "NGAIRA" },
+          { id: "2", name: "KIOKO" },
+          { id: "3", name: "TUM" },
         ]
 
         const transformedLocations: Location[] = locationsData.map((loc: any) => {
@@ -120,8 +120,8 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
             // Fallback to technician_id if available
             assignedTechnician = currentTechnicians.find((t: any) => t.id === loc.technician_id)
           } else {
-            // Default to ngaira
-            assignedTechnician = currentTechnicians.find((t: any) => t.id === "1" || t.name.toLowerCase() === "ngaira")
+            // Default to NGAIRA
+            assignedTechnician = currentTechnicians.find((t: any) => t.id === "1" || t.name.toUpperCase() === "NGAIRA")
           }
           
           return {
@@ -249,7 +249,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         
         // Get the selected technician name from the technician_id
         const selectedTechnician = technicians.find((t) => t.id === location.technician_id)
-        const technicianName = selectedTechnician?.name || "ngaira"
+        const technicianName = selectedTechnician?.name || "NGAIRA"
         console.log("[v0] Using technician:", technicianName)
         
         const { error: splitterError } = await supabase.from("splitters").insert(
@@ -326,7 +326,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     try {
       // Find the location to get its current technician
       const location = locations.find(l => l.id === locationId)
-      const technicianName = location?.technician?.name || "ngaira"
+      const technicianName = location?.technician?.name || "NGAIRA"
       
       console.log("[v0] Adding splitter to location:", locationId, "with technician:", technicianName)
       
