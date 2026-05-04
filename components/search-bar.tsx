@@ -60,7 +60,7 @@ export function SearchBar({
       if (portInputRef.current) {
         portInputRef.current.blur()
       }
-    }, 1000)
+    }, 2000)
   }
 
   const handleModelClick = (model: string) => {
