@@ -155,7 +155,7 @@ export function SplitterDashboard() {
         </div>
       </main>
 
-      <AddLocationModal open={showAddModal} onOpenChange={setShowAddModal} />
+      <AddLocationModal open={showAddModal} onOpenChange={setShowAddModal} teamId={String(selectedTeamId || "")} />
     </div>
   )
 }

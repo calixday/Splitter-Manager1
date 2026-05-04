@@ -14,7 +14,7 @@ interface SearchBarProps {
   setSelectedModel?: (model: string) => void
 }
 
-const TECHNICIANS = ["ngaira", "kioko", "tum"]
+const TECHNICIANS = ["NGAIRA", "KIOKO", "TUM"]
 const SAMPLE_SPLITTER_MODELS = ["ADHS C650 1", "ADHS C650 2", "JT C650", "KAREN C650", "KAREN C620", "RUBIA C650", "NRB MILIMANI C650"]
 
 export function SearchBar({ 
@@ -31,23 +31,14 @@ export function SearchBar({
   const portInputRef = useRef<HTMLInputElement>(null)
   const modelInputRef = useRef<HTMLInputElement>(null)
   const keyboardTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const [showKeyboardHint, setShowKeyboardHint] = useState(false)
 
   const handlePortChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newValue = e.target.value
-
-    // Show keyboard hint when user starts typing
-    setShowKeyboardHint(true)
 
     // Clear existing timeout
     if (keyboardTimeoutRef.current) {
       clearTimeout(keyboardTimeoutRef.current)
     }
-
-    // Set new timeout to hide keyboard after 3 seconds of inactivity
-    keyboardTimeoutRef.current = setTimeout(() => {
-      setShowKeyboardHint(false)
-    }, 3000)
 
     // Auto-format: add "/" after first digit
     if (newValue.length === 1 && /^\d$/.test(newValue)) {
@@ -63,17 +54,22 @@ export function SearchBar({
     }
 
     setSearchQuery(newValue)
+
+    // Auto-hide keyboard after 3 seconds of inactivity
+    keyboardTimeoutRef.current = setTimeout(() => {
+      if (portInputRef.current) {
+        portInputRef.current.blur()
+      }
+    }, 3000)
   }
 
   const handleModelClick = (model: string) => {
     if (selectedModel === model) {
       setSelectedModel("")
       setSearchQuery("")
-      setShowKeyboardHint(false)
     } else {
       setSelectedModel(model)
       setSearchQuery("")
-      setShowKeyboardHint(false)
       // Focus the port input after selecting a model
       setTimeout(() => {
         portInputRef.current?.focus()
@@ -185,10 +181,7 @@ export function SearchBar({
                 />
                 {searchQuery && (
                   <button
-                    onClick={() => {
-                      setSearchQuery("")
-                      setShowKeyboardHint(false)
-                    }}
+                    onClick={() => setSearchQuery("")}
                     className="absolute right-2 text-slate-400 hover:text-red-400 transition-colors active:scale-90"
                     title="Clear"
                     type="button"
@@ -197,21 +190,6 @@ export function SearchBar({
                   </button>
                 )}
               </div>
-              
-              {/* Keyboard Hint */}
-              {showKeyboardHint && (
-                <div className="flex gap-1 flex-wrap text-xs text-slate-400 p-2 bg-slate-800/50 rounded border border-slate-700">
-                  <span className="font-semibold">Keyboard:</span>
-                  <div className="flex gap-1">
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                      <kbd key={num} className="px-1.5 py-0.5 rounded bg-slate-700 text-slate-200 text-xs border border-slate-600">
-                        {num}
-                      </kbd>
-                    ))}
-                  </div>
-                  <span className="text-slate-500 ml-auto">Disappears in 3 sec</span>
-                </div>
-              )}
             </div>
           )}
         </>
@@ -228,7 +206,7 @@ export function SearchBar({
             <option value="">Select a technician...</option>
             {TECHNICIANS.map((tech) => (
               <option key={tech} value={tech} className="bg-slate-700 text-white">
-                {tech.charAt(0).toUpperCase() + tech.slice(1)}
+                {tech}
               </option>
             ))}
           </select>
