@@ -60,23 +60,37 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       // Fetch technicians
       const { data: techniciansData, error: techError } = await supabase.from("technicians").select("*").order("name")
       
-      // If technicians table doesn't exist, initialize with sample data
-      if (techError?.code === "PGRST116" || techError?.message?.includes("Could not find the table")) {
-        const fallbackTechnicians = [
-          { id: "1", name: "ngaira" },
-          { id: "2", name: "kioko" },
-          { id: "3", name: "tum" },
-        ]
+      // Always use fallback technicians (Supabase not required)
+      const fallbackTechnicians = [
+        { id: "1", name: "ngaira" },
+        { id: "2", name: "kioko" },
+        { id: "3", name: "tum" },
+      ]
+      
+      if (techError) {
+        console.warn("[v0] Supabase not available, using fallback technicians:", techError?.message)
         setTechnicians(fallbackTechnicians)
-      } else if (techError) {
-        console.error("Error fetching technicians:", techError)
-        setTechnicians([])
       } else {
-        setTechnicians(techniciansData || [])
+        setTechnicians(techniciansData || fallbackTechnicians)
       }
       
       const { data: locationsData, error: locError } = await supabase.from("locations").select("*").order("name")
-      if (locError) throw locError
+      
+      // If Supabase fails, try to load from localStorage
+      if (locError) {
+        console.warn("[v0] Supabase locations fetch failed, loading from localStorage:", locError?.message)
+        const cached = localStorage.getItem(STORAGE_KEY)
+        if (cached) {
+          const parsedLocations = JSON.parse(cached)
+          setLocations(parsedLocations)
+          setIsConnected(false)
+          return
+        } else {
+          setLocations([])
+          setIsConnected(false)
+          return
+        }
+      }
 
       if (locationsData && locationsData.length > 0) {
         const { data: splitters, error: splittersError } = await supabase.from("splitters").select("*")
@@ -145,8 +159,15 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify([]))
       }
     } catch (error) {
-      console.error("Error fetching locations:", error)
-      setLocations([])
+      console.error("[v0] Error fetching locations:", error)
+      // Try to load from localStorage as fallback
+      const cached = localStorage.getItem(STORAGE_KEY)
+      if (cached) {
+        const parsedLocations = JSON.parse(cached)
+        setLocations(parsedLocations)
+      } else {
+        setLocations([])
+      }
     }
   }, [])
 
