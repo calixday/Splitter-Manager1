@@ -15,7 +15,7 @@ interface SearchBarProps {
 }
 
 const TECHNICIANS = ["NGAIRA", "KIOKO", "TUM"]
-const SAMPLE_SPLITTER_MODELS = ["ADHS C650 1", "ADHS C650 2", "JT C650", "KAREN C650", "KAREN C620", "RUBIA C650", "NRB MILIMANI C650"]
+const SAMPLE_SPLITTER_MODELS = ["ADHS C650 1", "ADHS C650 2", "JT C650", "KAREN C650", "KAREN C620", "RUBIA C320", "NRB MILIMANI C320"]
 
 export function SearchBar({ 
   searchQuery, 
@@ -61,7 +61,7 @@ export function SearchBar({
       if (portInputRef.current) {
         portInputRef.current.blur()
       }
-    }, 3000)
+    }, 2000)
   }
 
   const handleModelClick = (model: string) => {
