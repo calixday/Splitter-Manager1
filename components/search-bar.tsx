@@ -94,10 +94,6 @@ export function SearchBar({
     }
   }, [])
 
-  const handleTechnicianSelect = (tech: string) => {
-    setSearchQuery(tech)
-  }
-
   return (
     <div className="space-y-2 w-full">
       {/* Search Type Buttons */}
@@ -176,7 +172,7 @@ export function SearchBar({
                   value={searchQuery}
                   onChange={handlePortChange}
                   inputMode="numeric"
-                  maxLength={10}
+                  maxLength={4}
                   className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-8 min-h-10 sm:min-h-11"
                   autoFocus
                 />
@@ -196,23 +192,24 @@ export function SearchBar({
         </>
       )}
 
-      {/* Technician and Location Search */}
+      {/* Technician Selection */}
       {searchType === "technician" && (
-        <div className="relative w-full">
-          <select
-            value={searchQuery}
-            onChange={(e) => handleTechnicianSelect(e.target.value)}
-            className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-10 sm:min-h-11 appearance-none cursor-pointer font-medium"
-          >
-            <option value="">Select a technician...</option>
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-semibold text-slate-300">Select Technician:</label>
+          <div className="flex gap-2 flex-wrap">
             {TECHNICIANS.map((tech) => (
-              <option key={tech} value={tech} className="bg-slate-700 text-white">
+              <button
+                key={tech}
+                onClick={() => setSearchQuery(tech)}
+                className={`px-4 py-2 text-sm rounded-lg font-medium transition-all ${
+                  searchQuery === tech
+                    ? "bg-blue-600 text-white ring-2 ring-blue-400"
+                    : "bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white border border-slate-600"
+                }`}
+              >
                 {tech}
-              </option>
+              </button>
             ))}
-          </select>
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-            ▼
           </div>
         </div>
       )}

@@ -56,25 +56,23 @@ export function SplitterDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col">
-      <header className="border-b border-slate-800 bg-slate-900 shadow-sm sticky top-0 z-40">
-        <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
+      <header className="border-b border-slate-800 bg-slate-900 shadow-lg sticky top-0 z-40">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Top row: Title and stats */}
-          <div className="flex items-start justify-between py-2 sm:py-2.5 gap-2">
+          <div className="flex items-start justify-between py-4 sm:py-6 lg:py-8 gap-3">
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent line-clamp-1">
-                SPLITTER MGR
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent line-clamp-1">
+                Splitter Manager
               </h1>
-              <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap text-xs sm:text-sm">
-                <span className="text-slate-400">Nairobi South 1</span>
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-blue-500/20 px-1.5 py-0.5 text-xs font-medium text-blue-300">
-                  <span className="w-1 h-1 rounded-full bg-blue-400"></span>
-                  <span className="hidden sm:inline">{totalLocations}L</span>
-                  <span className="sm:hidden">{totalLocations}</span>
+              <div className="flex items-center gap-2 sm:gap-3 mt-3 flex-wrap text-sm sm:text-base">
+                <span className="text-slate-300 font-medium">Nairobi South 1</span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-3 py-1.5 text-sm font-medium text-blue-300 border border-blue-500/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                  <span>{totalLocations} Locations</span>
                 </span>
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-purple-500/20 px-1.5 py-0.5 text-xs font-medium text-purple-300">
-                  <span className="w-1 h-1 rounded-full bg-purple-400"></span>
-                  <span className="hidden sm:inline">{totalSplitters}S</span>
-                  <span className="sm:hidden">{totalSplitters}</span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/20 px-3 py-1.5 text-sm font-medium text-purple-300 border border-purple-500/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                  <span>{totalSplitters} Splitters</span>
                 </span>
               </div>
             </div>
