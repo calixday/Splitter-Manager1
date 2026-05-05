@@ -97,7 +97,7 @@ export function SearchBar({
   return (
     <div className="space-y-2 w-full">
       {/* Search Type Buttons */}
-      <div className="flex gap-1.5 w-full">
+      <div className="flex gap-3 w-full">
         <Button
           variant={searchType === "splitter" ? "default" : "outline"}
           onClick={() => {
@@ -105,11 +105,9 @@ export function SearchBar({
             setSearchQuery("")
             setSelectedModel("")
           }}
-          size="sm"
-          className="text-xs sm:text-xs flex-1 py-1.5 h-auto font-medium"
+          className="flex-1 py-3 h-auto text-sm sm:text-base font-semibold transition-all"
         >
-          <span className="hidden sm:inline">Splitter</span>
-          <span className="sm:hidden">Split</span>
+          Splitter
         </Button>
         <Button
           variant={searchType === "location" ? "default" : "outline"}
@@ -118,11 +116,9 @@ export function SearchBar({
             setSearchQuery("")
             setSelectedModel("")
           }}
-          size="sm"
-          className="text-xs sm:text-xs flex-1 py-1.5 h-auto font-medium"
+          className="flex-1 py-3 h-auto text-sm sm:text-base font-semibold transition-all"
         >
-          <span className="hidden sm:inline">Location</span>
-          <span className="sm:hidden">Loc</span>
+          Location
         </Button>
         <Button
           variant={searchType === "technician" ? "default" : "outline"}
@@ -131,25 +127,23 @@ export function SearchBar({
             setSearchQuery("")
             setSelectedModel("")
           }}
-          size="sm"
-          className="text-xs sm:text-xs flex-1 py-1.5 h-auto font-medium"
+          className="flex-1 py-3 h-auto text-sm sm:text-base font-semibold transition-all"
         >
-          <span className="hidden sm:inline">Technician</span>
-          <span className="sm:hidden">Tech</span>
+          Technician
         </Button>
       </div>
 
       {/* Sample Splitter Models - Only show when Splitter tab is active */}
       {searchType === "splitter" && (
         <>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-slate-300">Select Model:</label>
-            <div className="flex gap-1.5 overflow-x-auto pb-1">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-slate-200">Select Model:</label>
+            <div className="flex gap-2 overflow-x-auto pb-2">
               {SAMPLE_SPLITTER_MODELS.map((model) => (
                 <button
                   key={model}
                   onClick={() => handleModelClick(model)}
-                  className={`px-3 py-2 text-xs rounded-lg font-medium transition-all whitespace-nowrap flex-shrink-0 ${
+                  className={`px-4 py-2.5 text-sm rounded-lg font-medium transition-all whitespace-nowrap flex-shrink-0 ${
                     selectedModel === model
                       ? "bg-blue-600 text-white ring-2 ring-blue-400"
                       : "bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white border border-slate-600"
@@ -163,8 +157,8 @@ export function SearchBar({
 
           {/* Port Search Input - Only show when a model is selected */}
           {selectedModel && (
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-slate-300">Enter Port:</label>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-slate-200">Enter Port:</label>
               <div className="relative flex items-center w-full">
                 <Input
                   ref={portInputRef}
@@ -194,14 +188,14 @@ export function SearchBar({
 
       {/* Technician Selection */}
       {searchType === "technician" && (
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold text-slate-300">Select Technician:</label>
-          <div className="flex gap-2 flex-wrap">
+        <div className="flex flex-col gap-3">
+          <label className="text-sm font-semibold text-slate-200">Select Technician:</label>
+          <div className="flex gap-3 flex-wrap">
             {TECHNICIANS.map((tech) => (
               <button
                 key={tech}
                 onClick={() => setSearchQuery(tech)}
-                className={`px-4 py-2 text-sm rounded-lg font-medium transition-all ${
+                className={`px-5 py-3 text-base rounded-lg font-semibold transition-all ${
                   searchQuery === tech
                     ? "bg-blue-600 text-white ring-2 ring-blue-400"
                     : "bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white border border-slate-600"
@@ -215,24 +209,27 @@ export function SearchBar({
       )}
 
       {searchType === "location" && (
-        <div className="relative flex items-center w-full">
-          <Input
-            placeholder="Search location..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-8 min-h-10 sm:min-h-11"
-            autoFocus
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-2 text-slate-400 hover:text-red-400 transition-colors active:scale-90"
-              title="Clear"
-              type="button"
-            >
-              ✕
-            </button>
-          )}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold text-slate-200">Search Location:</label>
+          <div className="relative flex items-center w-full">
+            <Input
+              placeholder="Enter location name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-3 text-sm sm:text-base rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-8 min-h-12 sm:min-h-13"
+              autoFocus
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 text-slate-400 hover:text-red-400 transition-colors active:scale-90"
+                title="Clear"
+                type="button"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
