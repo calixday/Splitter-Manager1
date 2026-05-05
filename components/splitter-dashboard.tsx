@@ -57,22 +57,22 @@ export function SplitterDashboard() {
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col">
       <header className="border-b border-slate-800 bg-slate-900 shadow-lg sticky top-0 z-40">
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Top row: Title and stats */}
-          <div className="flex items-start justify-between py-4 sm:py-6 lg:py-8 gap-3">
+        <div className="w-full px-3 sm:px-4 lg:px-6">
+          {/* Top row: Title and stats - Compact */}
+          <div className="flex items-center justify-between py-2.5 sm:py-3 gap-2">
             <div className="flex-1 min-w-0">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent line-clamp-1">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent line-clamp-1">
                 Splitter Manager
               </h1>
-              <div className="flex items-center gap-2 sm:gap-3 mt-3 flex-wrap text-sm sm:text-base">
-                <span className="text-slate-300 font-medium">Nairobi South 1</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-3 py-1.5 text-sm font-medium text-blue-300 border border-blue-500/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                  <span>{totalLocations} Locations</span>
+              <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 flex-wrap text-xs sm:text-sm">
+                <span className="text-slate-400 font-medium">Nairobi South 1</span>
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-blue-300 border border-blue-500/30">
+                  <span className="w-1 h-1 rounded-full bg-blue-400"></span>
+                  <span>{totalLocations}L</span>
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/20 px-3 py-1.5 text-sm font-medium text-purple-300 border border-purple-500/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-                  <span>{totalSplitters} Splitters</span>
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-purple-500/20 px-2 py-0.5 text-xs font-medium text-purple-300 border border-purple-500/30">
+                  <span className="w-1 h-1 rounded-full bg-purple-400"></span>
+                  <span>{totalSplitters}S</span>
                 </span>
               </div>
             </div>
@@ -87,18 +87,16 @@ export function SplitterDashboard() {
             </button>
           </div>
           
-          {/* Bottom row: Search Bar */}
-          <div className="pb-2 sm:pb-2.5">
-            <div className="max-w-sm ml-auto">
-              <SearchBar
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                searchType={searchType}
-                setSearchType={setSearchType}
-                selectedModel={selectedModel}
-                setSelectedModel={setSelectedModel}
-              />
-            </div>
+          {/* Bottom row: Search Bar - Full Width */}
+          <div className="py-2.5 sm:py-3">
+            <SearchBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              searchType={searchType}
+              setSearchType={setSearchType}
+              selectedModel={selectedModel}
+              setSelectedModel={setSelectedModel}
+            />
           </div>
         </div>
       </header>
