@@ -48,9 +48,10 @@ export function SearchBar({
     // Only allow digits and forward slash
     newValue = newValue.replace(/[^0-9/]/g, "")
 
-    // Ensure format is correct (digit/digit)
-    if (newValue.length > 3) {
-      newValue = newValue.slice(0, 3)
+    // Ensure format is correct (only one forward slash allowed)
+    const slashCount = (newValue.match(/\//g) || []).length
+    if (slashCount > 1) {
+      newValue = newValue.replace(/\//g, "").slice(0, 2) + "/" + newValue.replace(/\//g, "").slice(2)
     }
 
     setSearchQuery(newValue)
@@ -171,11 +172,11 @@ export function SearchBar({
               <div className="relative flex items-center w-full">
                 <Input
                   ref={portInputRef}
-                  placeholder="e.g., 7/9"
+                  placeholder="e.g., 2/12"
                   value={searchQuery}
                   onChange={handlePortChange}
                   inputMode="numeric"
-                  maxLength={3}
+                  maxLength={10}
                   className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-8 min-h-10 sm:min-h-11"
                   autoFocus
                 />
