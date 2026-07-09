@@ -39,6 +39,7 @@ async function executeSql() {
         { id: '1', name: 'ngaira' },
         { id: '2', name: 'kioko' },
         { id: '3', name: 'tum' }
+        { id: '4', name: 'JONAH' },
       ])
       .select();
 
