@@ -45,6 +45,7 @@ async function runMigration() {
         { id: '1', name: 'ngaira' },
         { id: '2', name: 'kioko' },
         { id: '3', name: 'tum' }
+        { id: '4', name: 'jonah' }
       ], { onConflict: 'id' });
 
     if (insertError) {
