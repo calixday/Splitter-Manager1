@@ -19,7 +19,8 @@ CREATE POLICY IF NOT EXISTS "Allow all access to technicians" ON public.technici
 INSERT INTO public.technicians (id, name) VALUES
   ('1', 'ngaira'),
   ('2', 'kioko'),
-  ('3', 'tum')
+  ('3', 'tum'),
+  ('4', 'jonah')
 ON CONFLICT (id) DO NOTHING;
 
 -- Add technician_id column to locations table if it doesn't exist
