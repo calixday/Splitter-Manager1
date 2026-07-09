@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-const PREDEFINED_MODELS = ["JT C650", "ADHS C650 1", "ADHS C650 2","WOODMERE C320", "NRB MILIMANI C320", "KAREN C650", "RUBIA C320"]
+const PREDEFINED_MODELS = ["ADHS C650 1", "ADHS C650 2","WOODMERE C320","JT C650", "NRB MILIMANI C320", "KAREN C650", "RUBIA C320"]
 
 interface AddLocationModalProps {
   open: boolean
