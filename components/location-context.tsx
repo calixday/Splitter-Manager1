@@ -66,6 +66,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         { id: "1", name: "NGAIRA" },
         { id: "2", name: "KIOKO" },
         { id: "3", name: "TUM" },
+        { id: "4", name: "JONAH" },
       ]
       
       if (techError) {
@@ -103,6 +104,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           { id: "1", name: "NGAIRA" },
           { id: "2", name: "KIOKO" },
           { id: "3", name: "TUM" },
+          { id: "4", name: "JONAH" },
         ]
 
         const transformedLocations: Location[] = locationsData.map((loc: any) => {
