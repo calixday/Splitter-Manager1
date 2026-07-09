@@ -14,8 +14,8 @@ interface SearchBarProps {
   setSelectedModel?: (model: string) => void
 }
 
-const TECHNICIANS = ["NGAIRA", "KIOKO", "TUM"]
-const SAMPLE_SPLITTER_MODELS = ["ADHS C650 1", "ADHS C650 2", "JT C650", "KAREN C650", "KAREN C620", "RUBIA C320", "NRB MILIMANI C320"]
+const TECHNICIANS = ["NGAIRA", "KIOKO", "TUM","JONAH"]
+const SAMPLE_SPLITTER_MODELS = ["ADHS C650 1", "ADHS C650 2","WOODMERE C320", "JT C650", "KAREN C650", "KAREN C620", "RUBIA C320", "NRB MILIMANI C320"]
 
 export function SearchBar({ 
   searchQuery, 
