@@ -44,11 +44,25 @@ export function SearchBar({
   // * if (newValue.length === 1 && /^\d$/.test(newValue)) {
    //   newValue = newValue + "/"
     //}
-    const isNgando = selectedModel.toUpperCase().includes("NG'ANDO")
-const prefixLength = isNgando ? 2 : 1
+   // const isNgando = selectedModel.toUpperCase().includes("NG'ANDO")
+//const prefixLength = isNgando ? 2 : 1
 
-if (newValue.length === prefixLength && /^\d+$/.test(newValue)) {
-  newValue = newValue + "/"
+//if (newValue.length === prefixLength && /^\d+$/.test(newValue)) {
+//  newValue = newValue + "/"
+//}
+
+    const isNgando = selectedModel.toUpperCase().includes("NG'ANDO")
+
+if (isNgando) {
+  if (newValue.length === 1 && /^[2-9]$/.test(newValue)) {
+    newValue += "/"
+  } else if (newValue.length === 2 && /^1\d$/.test(newValue)) {
+    newValue += "/"
+  }
+} else {
+  if (newValue.length === 1 && /^\d$/.test(newValue)) {
+    newValue += "/"
+  }
 }
 
     // Only allow digits and forward slash
