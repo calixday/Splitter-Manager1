@@ -41,9 +41,15 @@ export function SearchBar({
     }
 
     // Auto-format: add "/" after first digit
-    if (newValue.length === 1 && /^\d$/.test(newValue)) {
-      newValue = newValue + "/"
-    }
+  // * if (newValue.length === 1 && /^\d$/.test(newValue)) {
+   //   newValue = newValue + "/"
+    //}
+    const isNgando = selectedModel.toUpperCase().includes("NG'ANDO")
+const prefixLength = isNgando ? 2 : 1
+
+if (newValue.length === prefixLength && /^\d+$/.test(newValue)) {
+  newValue = newValue + "/"
+}
 
     // Only allow digits and forward slash
     newValue = newValue.replace(/[^0-9/]/g, "")
